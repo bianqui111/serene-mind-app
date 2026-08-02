@@ -4,7 +4,7 @@ import { PSICOLOGOS } from "@/lib/serena/data";
 export function Psicologos({ onInicio }: { onInicio: () => void }) {
   return (
     <Fondo>
-      <CabeceraRecurso titulo="Psicólogos" subtitulo="Profesionales para acompañarte" onInicio={onInicio} />
+      <CabeceraRecurso titulo="Psicólogos" subtitulo="Especialistas en adolescentes y jóvenes" onInicio={onInicio} />
 
       <div className="animate-rise grid gap-4">
         {PSICOLOGOS.map((p, i) => (
@@ -22,9 +22,11 @@ export function Psicologos({ onInicio }: { onInicio: () => void }) {
                 <p className="text-xs text-muted-foreground">{p.especialidad}</p>
               </div>
             </div>
-            <p className="mt-3 text-xs text-secondary-foreground">{p.experiencia}</p>
+            <p className="mt-3 text-xs leading-relaxed text-secondary-foreground">{p.descripcion}</p>
+            <p className="mt-2 text-[11px] font-semibold text-muted-foreground">{p.experiencia}</p>
             <div className="mt-3 flex flex-wrap gap-2 text-[11px] font-semibold">
               <span className="rounded-full bg-secondary px-3 py-1 text-secondary-foreground">{p.modalidad}</span>
+              <span className="rounded-full bg-accent px-3 py-1 text-accent-foreground">Adolescentes y jóvenes</span>
               <span className="rounded-full bg-accent px-3 py-1 text-accent-foreground">Paraguay</span>
             </div>
             <div className="mt-4 grid grid-cols-2 gap-2">
