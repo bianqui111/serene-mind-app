@@ -1,19 +1,28 @@
 import { useEffect, useRef, useState } from "react";
 import { CabeceraRecurso, Fondo, Recomendaciones } from "./Ui";
 
-const TECNICAS = [
+type Tecnica = {
+  id: string;
+  nombre: string;
+  desc: string;
+  fases: [number, number, number, number];
+};
+
+const TECNICAS: Tecnica[] = [
   { id: "478", nombre: "4 · 7 · 8", desc: "Ideal para dormir y bajar la activación", fases: [4, 7, 8, 0] },
   { id: "caja", nombre: "Respiración en caja", desc: "Equilibra y enfoca la mente", fases: [4, 4, 4, 4] },
   { id: "calma", nombre: "Calma profunda 4 · 6", desc: "Rápida para picos de ansiedad", fases: [4, 0, 6, 0] },
 ];
 
+const PRIMERA = TECNICAS[0]!;
 const ETIQUETAS = ["Inhalá", "Sostené", "Exhalá", "Pausá"];
+const dur = (t: Tecnica, i: number) => t.fases[i] ?? 0;
 
 export function Respiracion({ onInicio }: { onInicio: () => void }) {
-  const [tecnica, setTecnica] = useState(TECNICAS[0]);
+  const [tecnica, setTecnica] = useState<Tecnica>(PRIMERA);
   const [activo, setActivo] = useState(false);
   const [fase, setFase] = useState(0);
-  const [resto, setResto] = useState(TECNICAS[0].fases[0]);
+  const [resto, setResto] = useState(dur(PRIMERA, 0));
   const [ciclos, setCiclos] = useState(0);
   const ref = useRef<number | null>(null);
 
@@ -24,9 +33,9 @@ export function Respiracion({ onInicio }: { onInicio: () => void }) {
         if (r > 1) return r - 1;
         setFase((f) => {
           let n = f;
-          do { n = (n + 1) % 4; } while (tecnica.fases[n] === 0);
+          do { n = (n + 1) % 4; } while (dur(tecnica, n) === 0);
           if (n === 0) setCiclos((c) => c + 1);
-          setResto(tecnica.fases[n]);
+          setResto(dur(tecnica, n));
           return n;
         });
         return 0;
@@ -35,16 +44,16 @@ export function Respiracion({ onInicio }: { onInicio: () => void }) {
     return () => { if (ref.current) window.clearInterval(ref.current); };
   }, [activo, tecnica]);
 
-  const reiniciar = (t = tecnica) => {
+  const reiniciar = (t: Tecnica = tecnica) => {
     setActivo(false);
     setTecnica(t);
     setFase(0);
-    setResto(t.fases[0]);
+    setResto(dur(t, 0));
     setCiclos(0);
   };
 
   const escala = fase === 0 ? 1.35 : fase === 2 ? 0.72 : 1.1;
-  const duracion = Math.max(tecnica.fases[fase], 1);
+  const duracion = Math.max(dur(tecnica, fase), 1);
 
   return (
     <Fondo>
@@ -74,7 +83,7 @@ export function Respiracion({ onInicio }: { onInicio: () => void }) {
           />
           <div className="relative text-center text-primary-foreground">
             <p className="text-lg font-bold drop-shadow">{activo ? ETIQUETAS[fase] : "Listo"}</p>
-            <p className="text-5xl font-bold drop-shadow">{activo ? resto : tecnica.fases[0]}</p>
+            <p className="text-5xl font-bold drop-shadow">{activo ? resto : dur(tecnica, 0)}</p>
           </div>
         </div>
         <p className="mt-2 text-xs text-muted-foreground">Ciclos completados: {ciclos}</p>

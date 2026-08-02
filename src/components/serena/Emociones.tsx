@@ -5,7 +5,7 @@ import { borrarEmocion, getEmociones, guardarEmocion, type RegistroEmocion } fro
 
 export function Emociones({ onInicio }: { onInicio: () => void }) {
   const [registros, setRegistros] = useState<RegistroEmocion[]>([]);
-  const [emocion, setEmocion] = useState(EMOCIONES[0]);
+  const [emocion, setEmocion] = useState(EMOCIONES[0]!);
   const [nivel, setNivel] = useState(5);
   const [nota, setNota] = useState("");
   const [aviso, setAviso] = useState("");

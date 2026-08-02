@@ -223,7 +223,9 @@ export const PLANTILLAS: Plantilla[] = [
     nombre: "Cielo estrellado",
     dibujar: (c) => {
       const pts = [[120, 140], [300, 100], [470, 170], [180, 330], [400, 300], [540, 400], [120, 480], [320, 470], [470, 560]];
-      pts.forEach(([x, y], i) => {
+      pts.forEach((pt, i) => {
+        const x = pt[0]!;
+        const y = pt[1]!;
         const r = 36 + (i % 3) * 12;
         c.beginPath();
         for (let k = 0; k < 10; k++) {
@@ -271,7 +273,7 @@ export const PLANTILLAS: Plantilla[] = [
   },
 ];
 
-const hexToRgb = (hex: string) => [
+const hexToRgb = (hex: string): [number, number, number] => [
   parseInt(hex.slice(1, 3), 16),
   parseInt(hex.slice(3, 5), 16),
   parseInt(hex.slice(5, 7), 16),
@@ -282,16 +284,16 @@ function floodFill(ctx: CanvasRenderingContext2D, x: number, y: number, color: s
   const d = img.data;
   const idx = (px: number, py: number) => (py * W + px) * 4;
   const start = idx(x, y);
-  const target = [d[start], d[start + 1], d[start + 2], d[start + 3]];
+  const target: [number, number, number, number] = [d[start]!, d[start + 1]!, d[start + 2]!, d[start + 3]!];
   const [r, g, b] = hexToRgb(color);
   if (Math.abs(target[0] - r) < 6 && Math.abs(target[1] - g) < 6 && Math.abs(target[2] - b) < 6) return;
 
   const tol = 60;
   const coincide = (i: number) =>
-    Math.abs(d[i] - target[0]) <= tol &&
-    Math.abs(d[i + 1] - target[1]) <= tol &&
-    Math.abs(d[i + 2] - target[2]) <= tol &&
-    Math.abs(d[i + 3] - target[3]) <= tol;
+    Math.abs(d[i]! - target[0]) <= tol &&
+    Math.abs(d[i + 1]! - target[1]) <= tol &&
+    Math.abs(d[i + 2]! - target[2]) <= tol &&
+    Math.abs(d[i + 3]! - target[3]) <= tol;
 
   const stack: number[] = [x, y];
   const visto = new Uint8Array(W * H);
@@ -315,8 +317,8 @@ function floodFill(ctx: CanvasRenderingContext2D, x: number, y: number, color: s
 
 export function Arte({ onInicio }: { onInicio: () => void }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [plantilla, setPlantilla] = useState(PLANTILLAS[1]);
-  const [color, setColor] = useState(PALETA_20[3]);
+  const [plantilla, setPlantilla] = useState<Plantilla>(PLANTILLAS[1]!);
+  const [color, setColor] = useState<string>(PALETA_20[3]!);
   const [modo, setModo] = useState<"pintar" | "dibujar">("pintar");
   const [grosor, setGrosor] = useState(10);
   const [galeria, setGaleria] = useState<Dibujo[]>([]);
