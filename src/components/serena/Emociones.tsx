@@ -100,6 +100,50 @@ export function Emociones({ onInicio }: { onInicio: () => void }) {
         </div>
       </div>
 
+      {estadisticas.length > 0 && (
+        <section className="animate-rise mt-6 rounded-3xl bg-card p-4 shadow-soft">
+          <h2 className="text-base font-bold text-deep">Estadística de mis emociones</h2>
+          <p className="mt-1 text-[11px] text-muted-foreground">Resumen de tus {registros.length} registros</p>
+          <div className="mt-3 overflow-x-auto">
+            <table className="w-full border-collapse text-left text-xs">
+              <thead>
+                <tr className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                  <th className="pb-2 font-bold">Emoción</th>
+                  <th className="pb-2 text-center font-bold">Veces</th>
+                  <th className="pb-2 text-center font-bold">Prom.</th>
+                  <th className="pb-2 text-center font-bold">Máx.</th>
+                  <th className="pb-2 text-right font-bold">%</th>
+                </tr>
+              </thead>
+              <tbody>
+                {estadisticas.map((e) => (
+                  <tr key={e.id} className="border-t border-border align-middle">
+                    <td className="py-2.5 font-semibold text-deep">
+                      <span className="mr-1.5">{e.emoji}</span>
+                      {e.label}
+                    </td>
+                    <td className="py-2.5 text-center text-secondary-foreground">{e.veces}</td>
+                    <td className="py-2.5 text-center text-secondary-foreground">{e.promedio.toFixed(1)}</td>
+                    <td className="py-2.5 text-center text-secondary-foreground">{e.maximo}</td>
+                    <td className="py-2.5 text-right">
+                      <span className="font-bold text-primary">{Math.round(e.porcentaje)}%</span>
+                      <span className="mt-1 block h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                        <span
+                          className="block h-full rounded-full bg-dawn"
+                          style={{ width: `${e.porcentaje}%` }}
+                        />
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+
+
+
       {registros.length > 0 && (
         <section className="animate-rise mt-6 space-y-2">
           <h2 className="text-base font-bold text-deep">Mi historial</h2>
