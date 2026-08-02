@@ -319,7 +319,7 @@ export function Arte({ onInicio }: { onInicio: () => void }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [plantilla, setPlantilla] = useState<Plantilla>(PLANTILLAS[1]!);
   const [color, setColor] = useState<string>(PALETA_20[3]!);
-  const [modo, setModo] = useState<"pintar" | "dibujar">("pintar");
+  const [modo, setModo] = useState<"pintar" | "dibujar" | "borrar">("pintar");
   const [grosor, setGrosor] = useState(10);
   const [galeria, setGaleria] = useState<Dibujo[]>([]);
   const [aviso, setAviso] = useState("");
@@ -359,8 +359,8 @@ export function Arte({ onInicio }: { onInicio: () => void }) {
     }
     pintando.current = true;
     e.currentTarget.setPointerCapture(e.pointerId);
-    c.strokeStyle = color;
-    c.lineWidth = grosor;
+    c.strokeStyle = modo === "borrar" ? "#ffffff" : color;
+    c.lineWidth = modo === "borrar" ? grosor * 2.5 : grosor;
     c.lineCap = "round";
     c.lineJoin = "round";
     c.beginPath();
@@ -368,7 +368,7 @@ export function Arte({ onInicio }: { onInicio: () => void }) {
   };
 
   const onMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    if (!pintando.current || modo !== "dibujar") return;
+    if (!pintando.current || modo === "pintar") return;
     const c = canvasRef.current?.getContext("2d", { willReadFrequently: true });
     if (!c) return;
     const { x, y } = pos(e);
