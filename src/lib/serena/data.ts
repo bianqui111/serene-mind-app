@@ -71,24 +71,30 @@ export const VERSICULOS = [
 export const PSICOLOGOS = [
   {
     nombre: "Héctor González",
-    especialidad: "Terapia cognitivo-conductual · Trastornos de ansiedad",
-    experiencia: "12 años de experiencia · Atiende adultos y adolescentes",
+    especialidad: "Terapia cognitivo-conductual · Ansiedad en adolescentes",
+    experiencia: "12 años de experiencia · Atiende de 12 a 25 años",
+    descripcion:
+      "Acompaña a adolescentes y jóvenes que viven ansiedad por exámenes, presión académica y redes sociales. Trabaja con herramientas prácticas para calmar el cuerpo y ordenar los pensamientos, en un espacio libre de juicios.",
     telefono: "+595 981 472 305",
     modalidad: "Presencial y online",
     inicial: "HG",
   },
   {
     nombre: "Lucía Benítez",
-    especialidad: "Mindfulness clínico · Ataques de pánico",
-    experiencia: "9 años de experiencia · Atiende adultos",
+    especialidad: "Mindfulness clínico · Ataques de pánico en jóvenes",
+    experiencia: "9 años de experiencia · Atiende de 14 a 28 años",
+    descripcion:
+      "Especialista en crisis de pánico, insomnio y ansiedad social en jóvenes. Sus sesiones combinan respiración consciente y psicoeducación para que aprendas a reconocer tus señales antes de que la ansiedad se dispare.",
     telefono: "+595 972 318 640",
     modalidad: "Online",
     inicial: "LB",
   },
   {
     nombre: "Mariano Duarte",
-    especialidad: "Arteterapia · Manejo del estrés y duelo",
-    experiencia: "7 años de experiencia · Atiende niños y adultos",
+    especialidad: "Arteterapia · Estrés y autoestima adolescente",
+    experiencia: "7 años de experiencia · Atiende de 11 a 22 años",
+    descripcion:
+      "Usa el dibujo, el color y la escritura como puente para hablar de lo difícil. Ideal para adolescentes a quienes les cuesta poner en palabras lo que sienten, con foco en autoestima, duelo y cambios de etapa.",
     telefono: "+595 985 604 217",
     modalidad: "Presencial",
     inicial: "MD",

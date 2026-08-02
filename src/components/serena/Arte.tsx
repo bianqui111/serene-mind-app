@@ -319,7 +319,7 @@ export function Arte({ onInicio }: { onInicio: () => void }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [plantilla, setPlantilla] = useState<Plantilla>(PLANTILLAS[1]!);
   const [color, setColor] = useState<string>(PALETA_20[3]!);
-  const [modo, setModo] = useState<"pintar" | "dibujar">("pintar");
+  const [modo, setModo] = useState<"pintar" | "dibujar" | "borrar">("pintar");
   const [grosor, setGrosor] = useState(10);
   const [galeria, setGaleria] = useState<Dibujo[]>([]);
   const [aviso, setAviso] = useState("");
@@ -359,8 +359,8 @@ export function Arte({ onInicio }: { onInicio: () => void }) {
     }
     pintando.current = true;
     e.currentTarget.setPointerCapture(e.pointerId);
-    c.strokeStyle = color;
-    c.lineWidth = grosor;
+    c.strokeStyle = modo === "borrar" ? "#ffffff" : color;
+    c.lineWidth = modo === "borrar" ? grosor * 2.5 : grosor;
     c.lineCap = "round";
     c.lineJoin = "round";
     c.beginPath();
@@ -368,7 +368,7 @@ export function Arte({ onInicio }: { onInicio: () => void }) {
   };
 
   const onMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    if (!pintando.current || modo !== "dibujar") return;
+    if (!pintando.current || modo === "pintar") return;
     const c = canvasRef.current?.getContext("2d", { willReadFrequently: true });
     if (!c) return;
     const { x, y } = pos(e);
@@ -393,15 +393,15 @@ export function Arte({ onInicio }: { onInicio: () => void }) {
       <CabeceraRecurso titulo="Arte terapia" subtitulo="Dibujá, pintá y soltá lo que sentís" onInicio={onInicio} />
 
       <div className="animate-rise flex gap-2 rounded-2xl bg-card p-1.5 shadow-soft">
-        {(["pintar", "dibujar"] as const).map((m) => (
+        {(["pintar", "dibujar", "borrar"] as const).map((m) => (
           <button
             key={m}
             onClick={() => setModo(m)}
-            className={`flex-1 rounded-xl py-2.5 text-xs font-bold transition ${
+            className={`flex-1 rounded-xl py-2.5 text-[11px] font-bold transition ${
               modo === m ? "bg-dawn text-primary-foreground shadow-soft" : "text-muted-foreground"
             }`}
           >
-            {m === "pintar" ? "🪣 Pintar al tocar" : "✏️ Dibujar libre"}
+            {m === "pintar" ? "🪣 Pintar" : m === "dibujar" ? "✏️ Dibujar" : "🧽 Borrador"}
           </button>
         ))}
       </div>
@@ -446,9 +446,9 @@ export function Arte({ onInicio }: { onInicio: () => void }) {
             />
           ))}
         </div>
-        {modo === "dibujar" && (
+        {modo !== "pintar" && (
           <label className="mt-3 flex items-center gap-3 text-xs font-semibold text-muted-foreground">
-            Grosor
+            {modo === "borrar" ? "Tamaño del borrador" : "Grosor"}
             <input
               type="range"
               min={2}
