@@ -10,10 +10,12 @@ export function Emociones({ onInicio }: { onInicio: () => void }) {
   const [nota, setNota] = useState("");
   const [aviso, setAviso] = useState("");
 
-  useEffect(() => setRegistros(getEmociones()), []);
+  useEffect(() => {
+    getEmociones().then(setRegistros);
+  }, []);
 
-  const guardar = () => {
-    guardarEmocion({
+  const guardar = async () => {
+    await guardarEmocion({
       id: crypto.randomUUID(),
       fecha: new Date().toLocaleString("es-PY"),
       emocion: emocion.label,
@@ -21,7 +23,7 @@ export function Emociones({ onInicio }: { onInicio: () => void }) {
       nivel,
       nota: nota.trim(),
     });
-    setRegistros(getEmociones());
+    setRegistros(await getEmociones());
     setNota("");
     setAviso("Registro guardado 💙");
     setTimeout(() => setAviso(""), 2200);
@@ -156,7 +158,7 @@ export function Emociones({ onInicio }: { onInicio: () => void }) {
                   <p className="text-[11px] text-muted-foreground">{r.fecha}</p>
                 </div>
                 <button
-                  onClick={() => { borrarEmocion(r.id); setRegistros(getEmociones()); }}
+                  onClick={async () => { await borrarEmocion(r.id); setRegistros(await getEmociones()); }}
                   className="text-[11px] font-bold text-destructive"
                 >
                   Borrar

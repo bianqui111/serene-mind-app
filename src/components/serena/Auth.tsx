@@ -16,9 +16,9 @@ export function Auth({ onEntrar }: { onEntrar: (u: Usuario) => void }) {
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
 
-  const login = (e: React.FormEvent) => {
+  const login = async (e: React.FormEvent) => {
     e.preventDefault();
-    const r = iniciarSesion(form.email.trim(), form.password);
+    const r = await iniciarSesion(form.email.trim(), form.password);
     if (!r.ok || !r.usuario) {
       setError(r.error ?? "No pudimos iniciar sesión.");
       return;
@@ -26,12 +26,12 @@ export function Auth({ onEntrar }: { onEntrar: (u: Usuario) => void }) {
     onEntrar(r.usuario);
   };
 
-  const registrar = (e: React.FormEvent) => {
+  const registrar = async (e: React.FormEvent) => {
     e.preventDefault();
     if (form.nombre.trim().length < 2) return setError("Ingresá tu nombre.");
     if (!form.email.includes("@")) return setError("Ingresá un correo válido.");
-    if (form.password.length < 4) return setError("La contraseña debe tener al menos 4 caracteres.");
-    const r = registrarUsuario({ nombre: form.nombre.trim(), email: form.email.trim(), password: form.password });
+    if (form.password.length < 6) return setError("La contraseña debe tener al menos 6 caracteres.");
+    const r = await registrarUsuario({ nombre: form.nombre.trim(), email: form.email.trim(), password: form.password });
     if (!r.ok) return setError(r.error ?? "No pudimos crear la cuenta.");
     setError("");
     setAviso("¡Cuenta creada! Ahora iniciá sesión para entrar.");

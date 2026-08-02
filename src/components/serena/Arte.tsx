@@ -325,7 +325,7 @@ export function Arte({ onInicio }: { onInicio: () => void }) {
   const [aviso, setAviso] = useState("");
   const pintando = useRef(false);
 
-  useEffect(() => setGaleria(getDibujos()), []);
+  useEffect(() => { getDibujos().then(setGaleria); }, []);
 
   const render = (p = plantilla) => {
     const c = canvasRef.current?.getContext("2d", { willReadFrequently: true });
@@ -378,12 +378,12 @@ export function Arte({ onInicio }: { onInicio: () => void }) {
 
   const onUp = () => { pintando.current = false; };
 
-  const guardar = () => {
+  const guardar = async () => {
     const data = canvasRef.current?.toDataURL("image/png");
     if (!data) return;
     const d: Dibujo = { id: crypto.randomUUID(), fecha: new Date().toLocaleString("es-PY"), data };
-    guardarDibujo(d);
-    setGaleria(getDibujos());
+    await guardarDibujo(d);
+    setGaleria(await getDibujos());
     setAviso("Dibujo guardado en tu galería 💜");
     setTimeout(() => setAviso(""), 2500);
   };
@@ -476,7 +476,7 @@ export function Arte({ onInicio }: { onInicio: () => void }) {
                 <figcaption className="mt-1 flex items-center justify-between text-[10px] text-muted-foreground">
                   {d.fecha}
                   <button
-                    onClick={() => { borrarDibujo(d.id); setGaleria(getDibujos()); }}
+                    onClick={async () => { await borrarDibujo(d.id); setGaleria(await getDibujos()); }}
                     className="font-bold text-destructive"
                   >
                     Borrar

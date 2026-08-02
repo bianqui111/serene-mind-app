@@ -9,7 +9,9 @@ import { Arte } from "@/components/serena/Arte";
 import { Musica } from "@/components/serena/Musica";
 import { Psicologos } from "@/components/serena/Psicologos";
 import type { Recurso } from "@/lib/serena/data";
-import { cerrarSesion, sesionActiva, versiculoNotificadoHoy, type Usuario } from "@/lib/serena/store";
+import { cerrarSesion, versiculoNotificadoHoy, type Usuario } from "@/lib/serena/store";
+import { auth } from "@/lib/firebase";
+import { onAuthStateChanged } from "firebase/auth";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -36,14 +38,36 @@ export const Route = createFileRoute("/")({
 
 function App() {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
+  const [cargando, setCargando] = useState(true);
   const [vista, setVista] = useState<Recurso | null>(null);
 
-  useEffect(() => setUsuario(sesionActiva()), []);
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // Leemos el nombre temporal en caso de que acabe de registrarse
+        const tempName = typeof window !== "undefined" ? window.localStorage.getItem("serena.tempName") : null;
+        const nombreFinal = user.displayName || tempName || user.email || "Usuario";
+        
+        // Si ya tiene displayName oficial de Firebase, borramos el temporal
+        if (user.displayName && typeof window !== "undefined") {
+          window.localStorage.removeItem("serena.tempName");
+        }
+
+        setUsuario({ nombre: nombreFinal, email: user.email || "" });
+      } else {
+        setUsuario(null);
+      }
+      setCargando(false);
+    });
+    return unsub;
+  }, []);
 
   useEffect(() => {
     if (!usuario) return;
     if (!versiculoNotificadoHoy()) notificarVersiculo();
   }, [usuario]);
+
+  if (cargando) return <div className="min-h-screen flex items-center justify-center bg-[#F9FAFB]"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#1E3A8A]"></div></div>;
 
   if (!usuario) return <Auth onEntrar={setUsuario} />;
 
