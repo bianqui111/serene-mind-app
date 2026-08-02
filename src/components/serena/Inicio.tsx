@@ -57,7 +57,7 @@ export function Inicio({
       </section>
 
       <h2 className="animate-rise mt-8 text-lg font-bold text-deep">Tus recursos</h2>
-      <div className="mt-3 grid grid-cols-2 gap-3">
+      <div className="mt-3 grid auto-rows-fr grid-cols-2 gap-3">
         {RECURSOS.map((r, i) => (
           <button
             key={r.id}
