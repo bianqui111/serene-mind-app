@@ -393,15 +393,15 @@ export function Arte({ onInicio }: { onInicio: () => void }) {
       <CabeceraRecurso titulo="Arte terapia" subtitulo="Dibujá, pintá y soltá lo que sentís" onInicio={onInicio} />
 
       <div className="animate-rise flex gap-2 rounded-2xl bg-card p-1.5 shadow-soft">
-        {(["pintar", "dibujar"] as const).map((m) => (
+        {(["pintar", "dibujar", "borrar"] as const).map((m) => (
           <button
             key={m}
             onClick={() => setModo(m)}
-            className={`flex-1 rounded-xl py-2.5 text-xs font-bold transition ${
+            className={`flex-1 rounded-xl py-2.5 text-[11px] font-bold transition ${
               modo === m ? "bg-dawn text-primary-foreground shadow-soft" : "text-muted-foreground"
             }`}
           >
-            {m === "pintar" ? "🪣 Pintar al tocar" : "✏️ Dibujar libre"}
+            {m === "pintar" ? "🪣 Pintar" : m === "dibujar" ? "✏️ Dibujar" : "🧽 Borrador"}
           </button>
         ))}
       </div>
@@ -446,9 +446,9 @@ export function Arte({ onInicio }: { onInicio: () => void }) {
             />
           ))}
         </div>
-        {modo === "dibujar" && (
+        {modo !== "pintar" && (
           <label className="mt-3 flex items-center gap-3 text-xs font-semibold text-muted-foreground">
-            Grosor
+            {modo === "borrar" ? "Tamaño del borrador" : "Grosor"}
             <input
               type="range"
               min={2}
