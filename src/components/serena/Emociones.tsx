@@ -31,6 +31,20 @@ export function Emociones({ onInicio }: { onInicio: () => void }) {
     ? (registros.reduce((a, r) => a + r.nivel, 0) / registros.length).toFixed(1)
     : "—";
 
+  const estadisticas = EMOCIONES.map((e) => {
+    const rs = registros.filter((r) => r.emocion === e.label);
+    const prom = rs.length ? rs.reduce((a, r) => a + r.nivel, 0) / rs.length : 0;
+    return {
+      ...e,
+      veces: rs.length,
+      promedio: prom,
+      maximo: rs.length ? Math.max(...rs.map((r) => r.nivel)) : 0,
+      porcentaje: registros.length ? (rs.length / registros.length) * 100 : 0,
+    };
+  })
+    .filter((e) => e.veces > 0)
+    .sort((a, b) => b.veces - a.veces);
+
   return (
     <Fondo>
       <CabeceraRecurso titulo="Seguimiento emocional" subtitulo="Registrá cómo te sentís hoy" onInicio={onInicio} />
