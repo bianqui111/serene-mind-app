@@ -106,12 +106,12 @@ export const PSICOLOGOS = [
   },
   {
     nombre: "Ana Ojeda",
-    especialidad: "Psicología clínica · Ansiedad y bienestar emocional",
-    experiencia: "8 años de experiencia · Atiende de 13 a 30 años",
+    especialidad: "",
+    experiencia: "",
     descripcion:
       "Especialista en el manejo de la ansiedad, estrés y dificultades emocionales en adolescentes y adultos jóvenes. Ofrece un espacio cálido y seguro donde trabajar las emociones con estrategias adaptadas a cada persona.",
     telefono: "+595 984 731 829",
-    modalidad: "Presencial y online",
+    modalidad: "",
     inicial: "AO",
   },
 ];

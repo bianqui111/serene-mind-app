@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CabeceraRecurso, Fondo, Boton } from "./Ui";
+import { CabeceraRecurso, Fondo } from "./Ui";
 import { sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 
