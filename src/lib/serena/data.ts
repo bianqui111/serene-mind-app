@@ -4,7 +4,8 @@ export type Recurso =
   | "versiculos"
   | "arte"
   | "musica"
-  | "psicologos";
+  | "psicologos"
+  | "ajustes";
 
 export const RECOMENDACIONES: Record<Recurso, string[]> = {
   respiracion: [
@@ -42,6 +43,10 @@ export const RECOMENDACIONES: Record<Recurso, string[]> = {
     "Antes de la consulta anotá tus síntomas, frecuencia e intensidad.",
     "La constancia semanal da mejores resultados que sesiones aisladas.",
     "Si tenés pensamientos de hacerte daño, buscá atención inmediata.",
+  ],
+  ajustes: [
+    "Guardá tu contraseña en un lugar seguro.",
+    "Usá un correo al que tengas acceso para poder recuperar tu cuenta.",
   ],
 };
 
@@ -98,6 +103,16 @@ export const PSICOLOGOS = [
     telefono: "+595 985 604 217",
     modalidad: "Presencial",
     inicial: "MD",
+  },
+  {
+    nombre: "Ana Ojeda",
+    especialidad: "Psicología clínica · Ansiedad y bienestar emocional",
+    experiencia: "8 años de experiencia · Atiende de 13 a 30 años",
+    descripcion:
+      "Especialista en el manejo de la ansiedad, estrés y dificultades emocionales en adolescentes y adultos jóvenes. Ofrece un espacio cálido y seguro donde trabajar las emociones con estrategias adaptadas a cada persona.",
+    telefono: "+595 984 731 829",
+    modalidad: "Presencial y online",
+    inicial: "AO",
   },
 ];
 

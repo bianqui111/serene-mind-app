@@ -8,6 +8,7 @@ import { Versiculos, notificarVersiculo } from "@/components/serena/Versiculos";
 import { Arte } from "@/components/serena/Arte";
 import { Musica } from "@/components/serena/Musica";
 import { Psicologos } from "@/components/serena/Psicologos";
+import { Ajustes } from "@/components/serena/Ajustes";
 import type { Recurso } from "@/lib/serena/data";
 import { cerrarSesion, versiculoNotificadoHoy, type Usuario } from "@/lib/serena/store";
 import { auth } from "@/lib/firebase";
@@ -79,6 +80,7 @@ function App() {
   if (vista === "arte") return <Arte onInicio={alInicio} />;
   if (vista === "musica") return <Musica onInicio={alInicio} />;
   if (vista === "psicologos") return <Psicologos onInicio={alInicio} />;
+  if (vista === "ajustes") return <Ajustes onInicio={alInicio} />;
 
   return (
     <Inicio

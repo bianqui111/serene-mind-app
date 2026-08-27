@@ -80,9 +80,17 @@ export function Inicio({
         </p>
       </section>
 
-      <button onClick={onSalir} className="press mt-6 w-full rounded-2xl border border-border bg-card py-3 text-xs font-bold text-primary">
-        Cerrar sesión
-      </button>
+      <div className="mt-6 grid grid-cols-2 gap-3">
+        <button
+          onClick={() => onAbrir("ajustes" as Recurso)}
+          className="press rounded-2xl border border-border bg-card py-3 text-xs font-bold text-primary"
+        >
+          ⚙️ Ajustes
+        </button>
+        <button onClick={onSalir} className="press rounded-2xl border border-border bg-card py-3 text-xs font-bold text-primary">
+          Cerrar sesión
+        </button>
+      </div>
     </Fondo>
   );
 }
