@@ -2,7 +2,10 @@ import { useState } from "react";
 import { Boton, Fondo, Logo } from "./Ui";
 import { iniciarSesion, registrarUsuario, type Usuario } from "@/lib/serena/store";
 
-type Pantalla = "bienvenida" | "login" | "registro";
+import { auth } from "@/lib/firebase";
+import { sendPasswordResetEmail } from "firebase/auth";
+
+type Pantalla = "bienvenida" | "login" | "registro" | "recuperar";
 
 const campo =
   "w-full rounded-2xl border border-border bg-card px-4 py-3 text-sm outline-none transition focus:border-primary focus:ring-4 focus:ring-ring/25";
@@ -37,6 +40,19 @@ export function Auth({ onEntrar }: { onEntrar: (u: Usuario) => void }) {
     setAviso("¡Cuenta creada! Ahora iniciá sesión para entrar.");
     setForm({ nombre: "", email: form.email.trim(), password: "" });
     setPantalla("login");
+  };
+
+  const recuperar = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.email.includes("@")) return setError("Ingresá un correo válido.");
+    try {
+      await sendPasswordResetEmail(auth, form.email.trim());
+      setError("");
+      setAviso("Si el correo existe, te enviamos un enlace para recuperar tu contraseña.");
+      setPantalla("login");
+    } catch (err) {
+      setError("Ocurrió un error al enviar el correo.");
+    }
   };
 
   return (
@@ -81,6 +97,13 @@ export function Auth({ onEntrar }: { onEntrar: (u: Usuario) => void }) {
             >
               ¿No tenés cuenta? Creá una acá
             </button>
+            <button
+              type="button"
+              onClick={() => { setPantalla("recuperar"); setError(""); setAviso(""); }}
+              className="w-full text-xs font-semibold text-primary"
+            >
+              Olvidé mi contraseña
+            </button>
             <button type="button" onClick={() => setPantalla("bienvenida")} className="w-full text-xs text-muted-foreground">
               Volver
             </button>
@@ -101,6 +124,25 @@ export function Auth({ onEntrar }: { onEntrar: (u: Usuario) => void }) {
               className="w-full pt-1 text-xs font-semibold text-primary"
             >
               Ya tengo cuenta
+            </button>
+          </form>
+        )}
+
+        {pantalla === "recuperar" && (
+          <form onSubmit={recuperar} className="animate-rise mt-8 space-y-3 rounded-3xl bg-card-soft p-6 shadow-soft">
+            <h2 className="text-lg font-bold text-deep">Recuperar contraseña</h2>
+            <p className="text-xs leading-relaxed text-secondary-foreground mb-4">
+              Ingresá tu correo y te enviaremos un enlace para restablecer tu contraseña.
+            </p>
+            <input className={campo} placeholder="Correo electrónico" value={form.email} onChange={set("email")} />
+            {error && <p className="text-xs font-semibold text-destructive">{error}</p>}
+            <Boton type="submit">Enviar enlace</Boton>
+            <button
+              type="button"
+              onClick={() => { setPantalla("login"); setError(""); }}
+              className="w-full pt-1 text-xs text-muted-foreground"
+            >
+              Volver
             </button>
           </form>
         )}
