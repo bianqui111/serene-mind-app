@@ -8,7 +8,7 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
-
+import { registerSW } from "virtual:pwa-register";
 import appCss from "../styles.css?url";
 
 function NotFoundComponent() {
@@ -130,6 +130,12 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      registerSW({ immediate: true });
+    }
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
