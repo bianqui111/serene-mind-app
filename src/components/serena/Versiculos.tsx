@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { CabeceraRecurso, Boton, Fondo, Recomendaciones } from "./Ui";
 import { VERSICULOS } from "@/lib/serena/data";
-import { marcarVersiculoNotificado, versiculoDelDia } from "@/lib/serena/store";
+import { marcarVersiculoNotificado, versiculoDelDia, guardarTokenFCM } from "@/lib/serena/store";
 
 export function notificarVersiculo() {
   if (typeof window === "undefined" || !("Notification" in window)) return false;
@@ -30,7 +30,27 @@ export function Versiculos({ onInicio }: { onInicio: () => void }) {
     }
     const permiso = await Notification.requestPermission();
     setEstado(permiso);
-    if (permiso === "granted") notificarVersiculo();
+    
+    if (permiso === "granted") {
+      try {
+        const { messaging } = await import("@/lib/firebase");
+        if (messaging) {
+          const { getToken } = await import("firebase/messaging");
+          const token = await getToken(messaging, {
+            vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY
+          });
+          if (token) {
+            await guardarTokenFCM(token);
+            notificarVersiculo(); // Enviamos una notificación de prueba local
+          }
+        } else {
+           notificarVersiculo(); // Fallback
+        }
+      } catch (err) {
+        console.error("Error al obtener token FCM:", err);
+        notificarVersiculo(); // Fallback si falla firebase
+      }
+    }
   };
 
   return (

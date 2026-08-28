@@ -11,7 +11,14 @@ export default defineConfig({
   vite: {
     plugins: [
       VitePWA({
+        strategies: "injectManifest",
+        srcDir: "src",
+        filename: "sw.ts",
         registerType: "autoUpdate",
+        injectManifest: {
+          globPatterns: ["**/*.{js,css,html,ico,png,svg}"],
+          maximumFileSizeToCacheInBytes: 3000000,
+        },
         manifest: {
           name: "Serenamente",
           short_name: "Serenamente",
@@ -31,10 +38,6 @@ export default defineConfig({
               type: "image/png",
             },
           ],
-        },
-        workbox: {
-          globPatterns: ["**/*.{js,css,html,ico,png,svg}"],
-          maximumFileSizeToCacheInBytes: 3000000,
         },
       }),
     ],
