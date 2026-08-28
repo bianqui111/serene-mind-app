@@ -95,7 +95,7 @@ export const PSICOLOGOS = [
     inicial: "ML",
   },
   {
-    nombre: "Ana Ojeda (Perfil de prueba)",
+    nombre: "Ana Ojeda",
     especialidad: "Psicología clínica · Ansiedad y bienestar emocional",
     experiencia: "8 años de experiencia · Atiende de 13 a 30 años",
     descripcion:
