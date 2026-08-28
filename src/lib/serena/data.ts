@@ -75,44 +75,24 @@ export const VERSICULOS = [
 
 export const PSICOLOGOS = [
   {
-    nombre: "Héctor González",
-    especialidad: "Terapia cognitivo-conductual · Ansiedad en adolescentes",
-    experiencia: "12 años de experiencia · Atiende de 12 a 25 años",
+    nombre: "Lic. Judith Ramos",
+    especialidad: "Terapeuta Certificada EMDR",
+    experiencia: "Adolescentes y adultos · Reg. Prof. 1642",
     descripcion:
-      "Acompaña a adolescentes y jóvenes que viven ansiedad por exámenes, presión académica y redes sociales. Trabaja con herramientas prácticas para calmar el cuerpo y ordenar los pensamientos, en un espacio libre de juicios.",
-    telefono: "+595 981 472 305",
-    modalidad: "Presencial y online",
-    inicial: "HG",
-  },
-  {
-    nombre: "Lucía Benítez",
-    especialidad: "Mindfulness clínico · Ataques de pánico en jóvenes",
-    experiencia: "9 años de experiencia · Atiende de 14 a 28 años",
-    descripcion:
-      "Especialista en crisis de pánico, insomnio y ansiedad social en jóvenes. Sus sesiones combinan respiración consciente y psicoeducación para que aprendas a reconocer tus señales antes de que la ansiedad se dispare.",
-    telefono: "+595 972 318 640",
-    modalidad: "Online",
-    inicial: "LB",
-  },
-  {
-    nombre: "Mariano Duarte",
-    especialidad: "Arteterapia · Estrés y autoestima adolescente",
-    experiencia: "7 años de experiencia · Atiende de 11 a 22 años",
-    descripcion:
-      "Usa el dibujo, el color y la escritura como puente para hablar de lo difícil. Ideal para adolescentes a quienes les cuesta poner en palabras lo que sienten, con foco en autoestima, duelo y cambios de etapa.",
-    telefono: "+595 985 604 217",
+      "Atención en Legión Civil Extranjera 378 c/Hassler (Villamorra, Asunción). Correo: jramos160@hotmail.com.",
+    telefono: "+595 992 221911",
     modalidad: "Presencial",
-    inicial: "MD",
+    inicial: "JR",
   },
   {
-    nombre: "Ana Ojeda",
-    especialidad: "",
-    experiencia: "",
+    nombre: "Lic. María Lourdes Agüero",
+    especialidad: "TCC · Ansiedad, depresión, estrés postraumático y laboral",
+    experiencia: "Adolescentes y adultos",
     descripcion:
-      "Especialista en el manejo de la ansiedad, estrés y dificultades emocionales en adolescentes y adultos jóvenes. Ofrece un espacio cálido y seguro donde trabajar las emociones con estrategias adaptadas a cada persona.",
-    telefono: "+595 984 731 829",
-    modalidad: "",
-    inicial: "AO",
+      "Terapia cognitivo-conductual enfocada en el bienestar emocional y tratamiento de trastornos del estado de ánimo.",
+    telefono: "+595 984 160 990",
+    modalidad: "Presencial y online",
+    inicial: "ML",
   },
 ];
 
