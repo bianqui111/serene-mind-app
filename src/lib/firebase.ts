@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
-import { getMessaging } from "firebase/messaging";
+
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -27,11 +27,4 @@ try {
   console.error("Error crítico inicializando Firebase (probablemente falten variables de entorno):", error);
 }
 
-export let messaging: any = null;
-try {
-  if (app && typeof window !== "undefined" && "serviceWorker" in navigator) {
-    messaging = getMessaging(app);
-  }
-} catch (error) {
-  console.warn("Firebase Messaging no está soportado en este navegador:", error);
-}
+

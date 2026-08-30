@@ -162,13 +162,4 @@ export const versiculoNotificadoHoy = () => {
   return v?.dia === new Date().toDateString();
 };
 
-// ======================= PUSH NOTIFICATIONS =======================
-export const guardarTokenFCM = async (token: string) => {
-  const uid = auth.currentUser?.uid;
-  if (!uid) return;
-  await setDoc(doc(db, `usuarios/${uid}/push_tokens`, token), {
-    token,
-    creado: new Date().toISOString(),
-    plataforma: typeof navigator !== "undefined" ? navigator.userAgent : "unknown"
-  });
-};
+
