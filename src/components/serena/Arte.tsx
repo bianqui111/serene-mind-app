@@ -392,103 +392,115 @@ export function Arte({ onInicio }: { onInicio: () => void }) {
     <Fondo>
       <CabeceraRecurso titulo="Arte terapia" subtitulo="Dibujá, pintá y soltá lo que sentís" onInicio={onInicio} />
 
-      <div className="animate-rise flex gap-2 rounded-2xl bg-card p-1.5 shadow-soft">
-        {(["pintar", "dibujar", "borrar"] as const).map((m) => (
-          <button
-            key={m}
-            onClick={() => setModo(m)}
-            className={`flex-1 rounded-xl py-2.5 text-[11px] font-bold transition ${
-              modo === m ? "bg-dawn text-primary-foreground shadow-soft" : "text-muted-foreground"
-            }`}
-          >
-            {m === "pintar" ? "🪣 Pintar" : m === "dibujar" ? "✏️ Dibujar" : "🧽 Borrador"}
-          </button>
-        ))}
-      </div>
-
-      <div className="mt-3 -mx-5 overflow-x-auto px-5 pb-1">
-        <div className="flex gap-2">
-          {PLANTILLAS.map((p) => (
-            <button
-              key={p.id}
-              onClick={() => setPlantilla(p)}
-              className={`press shrink-0 rounded-full px-4 py-2 text-xs font-semibold whitespace-nowrap ${
-                plantilla.id === p.id ? "bg-primary text-primary-foreground" : "bg-card text-secondary-foreground shadow-soft"
-              }`}
-            >
-              {p.nombre}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="animate-rise mt-3 overflow-hidden rounded-3xl bg-card p-3 shadow-lift">
-        <canvas
-          ref={canvasRef}
-          width={W}
-          height={H}
-          onPointerDown={onDown}
-          onPointerMove={onMove}
-          onPointerUp={onUp}
-          onPointerLeave={onUp}
-          className="aspect-square w-full touch-none rounded-2xl bg-white"
-        />
-        <div className="mt-3 grid grid-cols-10 gap-1.5">
-          {PALETA_20.map((c) => (
-            <button
-              key={c}
-              onClick={() => setColor(c)}
-              aria-label={`Color ${c}`}
-              style={{ backgroundColor: c }}
-              className={`aspect-square rounded-full transition ${
-                color === c ? "scale-110 ring-2 ring-primary ring-offset-2" : ""
-              }`}
-            />
-          ))}
-        </div>
-        {modo !== "pintar" && (
-          <label className="mt-3 flex items-center gap-3 text-xs font-semibold text-muted-foreground">
-            {modo === "borrar" ? "Tamaño del borrador" : "Grosor"}
-            <input
-              type="range"
-              min={2}
-              max={40}
-              value={grosor}
-              onChange={(e) => setGrosor(Number(e.target.value))}
-              className="flex-1 accent-primary"
-            />
-          </label>
-        )}
-        <div className="mt-3 grid grid-cols-2 gap-2">
-          <Boton variante="contorno" onClick={() => render()}>Limpiar</Boton>
-          <Boton onClick={guardar}>Guardar dibujo</Boton>
-        </div>
-        {aviso && <p className="mt-2 text-center text-xs font-semibold text-primary">{aviso}</p>}
-      </div>
-
-      {galeria.length > 0 && (
-        <section className="animate-rise mt-6">
-          <h2 className="text-base font-bold text-deep">Mis dibujos guardados</h2>
-          <div className="mt-3 grid grid-cols-2 gap-3">
-            {galeria.map((d) => (
-              <figure key={d.id} className="overflow-hidden rounded-2xl bg-card p-2 shadow-soft">
-                <img src={d.data} alt={`Dibujo del ${d.fecha}`} loading="lazy" className="rounded-xl" />
-                <figcaption className="mt-1 flex items-center justify-between text-[10px] text-muted-foreground">
-                  {d.fecha}
-                  <button
-                    onClick={async () => { await borrarDibujo(d.id); setGaleria(await getDibujos()); }}
-                    className="font-bold text-destructive"
-                  >
-                    Borrar
-                  </button>
-                </figcaption>
-              </figure>
+      <div className="grid gap-6 lg:grid-cols-[1fr_320px] lg:gap-8">
+        <div className="flex flex-col gap-4">
+          <div className="animate-rise flex gap-2 rounded-2xl bg-card p-1.5 shadow-soft">
+            {(["pintar", "dibujar", "borrar"] as const).map((m) => (
+              <button
+                key={m}
+                onClick={() => setModo(m)}
+                className={`flex-1 rounded-xl py-2.5 text-[11px] font-bold transition hover:bg-dawn/50 ${
+                  modo === m ? "bg-dawn text-primary-foreground shadow-soft" : "text-muted-foreground"
+                }`}
+              >
+                {m === "pintar" ? "🪣 Pintar" : m === "dibujar" ? "✏️ Dibujar" : "🧽 Borrador"}
+              </button>
             ))}
           </div>
-        </section>
-      )}
 
-      <Recomendaciones recurso="arte" />
+          <div className="-mx-5 overflow-x-auto px-5 lg:mx-0 lg:px-0 pb-1">
+            <div className="flex gap-2">
+              {PLANTILLAS.map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => setPlantilla(p)}
+                  className={`press shrink-0 rounded-full px-4 py-2 text-xs font-semibold whitespace-nowrap transition-colors hover:bg-primary/90 hover:text-white ${
+                    plantilla.id === p.id ? "bg-primary text-primary-foreground" : "bg-card text-secondary-foreground shadow-soft"
+                  }`}
+                >
+                  {p.nombre}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="animate-rise overflow-hidden rounded-3xl bg-card p-4 shadow-lift">
+            <canvas
+              ref={canvasRef}
+              width={W}
+              height={H}
+              onPointerDown={onDown}
+              onPointerMove={onMove}
+              onPointerUp={onUp}
+              onPointerLeave={onUp}
+              className="aspect-square w-full touch-none rounded-2xl bg-white shadow-inner cursor-crosshair"
+            />
+            <div className="mt-4 grid grid-cols-10 gap-1.5 md:gap-2">
+              {PALETA_20.map((c) => (
+                <button
+                  key={c}
+                  onClick={() => setColor(c)}
+                  aria-label={`Color ${c}`}
+                  style={{ backgroundColor: c }}
+                  className={`aspect-square rounded-full transition hover:scale-110 ${
+                    color === c ? "scale-110 ring-2 ring-primary ring-offset-2" : ""
+                  }`}
+                />
+              ))}
+            </div>
+            {modo !== "pintar" && (
+              <label className="mt-4 flex items-center gap-4 text-xs font-semibold text-muted-foreground">
+                {modo === "borrar" ? "Tamaño del borrador" : "Grosor"}
+                <input
+                  type="range"
+                  min={2}
+                  max={40}
+                  value={grosor}
+                  onChange={(e) => setGrosor(Number(e.target.value))}
+                  className="flex-1 accent-primary cursor-pointer"
+                />
+              </label>
+            )}
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <Boton variante="contorno" onClick={() => render()}>Limpiar</Boton>
+              <Boton onClick={guardar}>Guardar dibujo</Boton>
+            </div>
+            {aviso && <p className="mt-3 text-center text-xs font-semibold text-primary">{aviso}</p>}
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-6">
+          {galeria.length > 0 ? (
+            <section className="animate-rise">
+              <h2 className="text-base font-bold text-deep mb-3">Mis dibujos guardados</h2>
+              <div className="grid grid-cols-2 gap-3">
+                {galeria.map((d) => (
+                  <figure key={d.id} className="overflow-hidden rounded-2xl bg-card p-2 shadow-soft hover:shadow-md transition-shadow">
+                    <img src={d.data} alt={`Dibujo del ${d.fecha}`} loading="lazy" className="rounded-xl w-full" />
+                    <figcaption className="mt-2 flex items-center justify-between px-1 text-[10px] text-muted-foreground">
+                      <span>{d.fecha.split(',')[0]}</span>
+                      <button
+                        onClick={async () => { await borrarDibujo(d.id); setGaleria(await getDibujos()); }}
+                        className="font-bold text-destructive hover:underline"
+                      >
+                        Borrar
+                      </button>
+                    </figcaption>
+                  </figure>
+                ))}
+              </div>
+            </section>
+          ) : (
+            <div className="hidden lg:flex flex-1 flex-col items-center justify-center rounded-3xl bg-card-soft p-6 text-center border border-dashed border-border/50">
+              <span className="text-4xl mb-3">🖼️</span>
+              <p className="text-sm font-semibold text-deep">No hay dibujos aún</p>
+              <p className="text-xs text-muted-foreground mt-1">Los dibujos que guardes aparecerán aquí.</p>
+            </div>
+          )}
+
+          <Recomendaciones recurso="arte" />
+        </div>
+      </div>
     </Fondo>
   );
 }

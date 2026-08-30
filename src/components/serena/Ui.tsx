@@ -15,14 +15,39 @@ export function Logo({ size = 64, className = "" }: { size?: number; className?:
   );
 }
 
-export function Fondo({ children }: { children: ReactNode }) {
+import { motion, AnimatePresence } from "framer-motion";
+
+export function Fondo({ children, className = "" }: { children: ReactNode; className?: string }) {
+  return (
+    <div className={`relative mx-auto w-full max-w-5xl px-6 pb-20 pt-4 md:px-12 md:pb-24 ${className}`}>
+      {children}
+    </div>
+  );
+}
+
+export function PantallaBase({ children }: { children: ReactNode }) {
   return (
     <div className="relative min-h-screen overflow-hidden bg-background">
-      <div className="pointer-events-none absolute -left-24 -top-24 h-80 w-80 rounded-full bg-lilac/50 blur-3xl animate-drift" />
-      <div className="pointer-events-none absolute -right-20 top-40 h-72 w-72 rounded-full bg-sky-soft/50 blur-3xl animate-drift [animation-delay:-6s]" />
-      <div className="pointer-events-none absolute bottom-0 left-1/3 h-80 w-80 rounded-full bg-primary/25 blur-3xl animate-drift [animation-delay:-12s]" />
-      <div className="relative mx-auto w-full max-w-md px-5 pb-16">{children}</div>
+      <div className="pointer-events-none fixed -left-24 -top-24 h-80 w-80 rounded-full bg-lilac/50 blur-3xl animate-drift" />
+      <div className="pointer-events-none fixed -right-20 top-40 h-72 w-72 rounded-full bg-sky-soft/50 blur-3xl animate-drift [animation-delay:-6s]" />
+      <div className="pointer-events-none fixed bottom-0 left-1/3 h-80 w-80 rounded-full bg-primary/25 blur-3xl animate-drift [animation-delay:-12s]" />
+      {children}
     </div>
+  );
+}
+
+export function PageTransition({ children, transitionKey }: { children: ReactNode; transitionKey: string }) {
+  return (
+    <motion.div
+      key={transitionKey}
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -15 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      className="w-full h-full"
+    >
+      {children}
+    </motion.div>
   );
 }
 

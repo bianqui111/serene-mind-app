@@ -9,7 +9,7 @@ export function Psicologos({ onInicio }: { onInicio: () => void }) {
     <Fondo>
       <CabeceraRecurso titulo="Psicólogos" subtitulo="Especialistas en adolescentes y jóvenes" onInicio={onInicio} />
 
-      <div className="animate-rise grid gap-4">
+      <div className="animate-rise grid gap-4 md:grid-cols-2 md:gap-6 lg:grid-cols-3">
         {PSICOLOGOS.map((p, i) => (
           <article
             key={p.nombre}

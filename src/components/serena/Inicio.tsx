@@ -56,18 +56,18 @@ export function Inicio({
         </div>
       </section>
 
-      <h2 className="animate-rise mt-8 text-lg font-bold text-deep">Tus recursos</h2>
-      <div className="mt-3 grid auto-rows-fr grid-cols-2 gap-3">
+      <h2 className="animate-rise mt-10 text-xl font-bold text-deep">Tus recursos</h2>
+      <div className="mt-4 grid auto-rows-fr grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
         {RECURSOS.map((r, i) => (
           <button
             key={r.id}
             onClick={() => onAbrir(r.id)}
-            className="press rounded-3xl bg-card-soft p-5 text-left shadow-soft"
+            className="press rounded-3xl bg-card-soft p-5 text-left shadow-soft hover:shadow-md transition-shadow"
             style={{ animation: "rise 0.6s both", animationDelay: `${i * 80}ms` }}
           >
-            <span className="grid h-12 w-12 place-items-center rounded-2xl bg-dawn text-xl shadow-soft">{r.emoji}</span>
-            <span className="mt-3 block text-sm font-bold text-deep">{r.titulo}</span>
-            <span className="mt-1 block text-[11px] leading-snug text-muted-foreground">{r.desc}</span>
+            <span className="grid h-14 w-14 place-items-center rounded-2xl bg-dawn text-2xl shadow-soft">{r.emoji}</span>
+            <span className="mt-4 block text-base font-bold text-deep">{r.titulo}</span>
+            <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">{r.desc}</span>
           </button>
         ))}
       </div>

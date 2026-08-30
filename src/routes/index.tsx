@@ -14,6 +14,9 @@ import { cerrarSesion, versiculoNotificadoHoy, type Usuario } from "@/lib/serena
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 
+import { PantallaBase, PageTransition } from "@/components/serena/Ui";
+import { AnimatePresence } from "framer-motion";
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -74,22 +77,29 @@ function App() {
 
   const alInicio = () => setVista(null);
 
-  if (vista === "respiracion") return <Respiracion onInicio={alInicio} />;
-  if (vista === "emociones") return <Emociones onInicio={alInicio} />;
-  if (vista === "versiculos") return <Versiculos onInicio={alInicio} />;
-  if (vista === "arte") return <Arte onInicio={alInicio} />;
-  if (vista === "musica") return <Musica onInicio={alInicio} />;
-  if (vista === "psicologos") return <Psicologos onInicio={alInicio} />;
-  if (vista === "ajustes") return <Ajustes onInicio={alInicio} />;
-
   return (
-    <Inicio
-      nombre={usuario.nombre.split(" ")[0] ?? usuario.nombre}
-      onAbrir={setVista}
-      onSalir={() => {
-        cerrarSesion();
-        setUsuario(null);
-      }}
-    />
+    <PantallaBase>
+      <AnimatePresence mode="wait">
+        <PageTransition transitionKey={vista || "inicio"}>
+          {vista === "respiracion" && <Respiracion onInicio={alInicio} />}
+          {vista === "emociones" && <Emociones onInicio={alInicio} />}
+          {vista === "versiculos" && <Versiculos onInicio={alInicio} />}
+          {vista === "arte" && <Arte onInicio={alInicio} />}
+          {vista === "musica" && <Musica onInicio={alInicio} />}
+          {vista === "psicologos" && <Psicologos onInicio={alInicio} />}
+          {vista === "ajustes" && <Ajustes onInicio={alInicio} />}
+          {!vista && (
+            <Inicio
+              nombre={usuario.nombre.split(" ")[0] ?? usuario.nombre}
+              onAbrir={setVista}
+              onSalir={() => {
+                cerrarSesion();
+                setUsuario(null);
+              }}
+            />
+          )}
+        </PageTransition>
+      </AnimatePresence>
+    </PantallaBase>
   );
 }

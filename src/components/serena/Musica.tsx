@@ -138,61 +138,79 @@ export function Musica({ onInicio }: { onInicio: () => void }) {
     <Fondo>
       <CabeceraRecurso titulo="Música para relajarte" subtitulo="3 ambientes sonoros generados en vivo" onInicio={onInicio} />
 
-      <div className="animate-rise grid gap-3">
-        {PISTAS.map((p) => (
-          <button
-            key={p.id}
-            onClick={() => reproducir(p)}
-            className={`press flex items-center gap-4 rounded-3xl p-5 text-left shadow-soft transition ${
-              sonando === p.id ? "bg-dawn text-primary-foreground" : "bg-card"
-            }`}
-          >
-            <span className={`grid h-14 w-14 shrink-0 place-items-center rounded-2xl text-2xl ${
-              sonando === p.id ? "bg-white/25" : "bg-secondary"
-            }`}>
-              {p.emoji}
-            </span>
-            <span className="flex-1">
-              <span className="block text-sm font-bold">{p.nombre}</span>
-              <span className={`block text-xs ${sonando === p.id ? "opacity-85" : "text-muted-foreground"}`}>{p.desc}</span>
-            </span>
-            <span className="text-xl">{sonando === p.id ? "⏸" : "▶"}</span>
-          </button>
-        ))}
-      </div>
-
-      {sonando && (
-        <div className="animate-rise mt-5 rounded-3xl bg-card-soft p-5 shadow-soft">
-          <div className="flex h-16 items-end justify-center gap-1.5">
-            {Array.from({ length: 18 }).map((_, i) => (
-              <span
-                key={i}
-                className="w-2 rounded-full bg-dawn"
-                style={{
-                  height: `${25 + Math.abs(Math.sin(i)) * 60}%`,
-                  animation: "float 2.4s ease-in-out infinite",
-                  animationDelay: `${i * 90}ms`,
-                }}
-              />
+      <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
+        <div className="flex flex-col gap-6">
+          <div className="animate-rise grid gap-4">
+            <h2 className="text-base font-bold text-deep mb-1">Elegí tu ambiente</h2>
+            {PISTAS.map((p) => (
+              <button
+                key={p.id}
+                onClick={() => reproducir(p)}
+                className={`press flex items-center gap-4 rounded-3xl p-5 text-left shadow-soft transition hover:shadow-md ${
+                  sonando === p.id ? "bg-dawn text-primary-foreground" : "bg-card"
+                }`}
+              >
+                <span className={`grid h-14 w-14 shrink-0 place-items-center rounded-2xl text-2xl transition-colors ${
+                  sonando === p.id ? "bg-white/25" : "bg-secondary"
+                }`}>
+                  {p.emoji}
+                </span>
+                <span className="flex-1">
+                  <span className="block text-sm font-bold">{p.nombre}</span>
+                  <span className={`block text-xs mt-1 ${sonando === p.id ? "opacity-90" : "text-muted-foreground"}`}>{p.desc}</span>
+                </span>
+                <span className="text-xl">{sonando === p.id ? "⏸" : "▶"}</span>
+              </button>
             ))}
           </div>
-          <label className="mt-4 flex items-center gap-3 text-xs font-semibold text-muted-foreground">
-            Volumen
-            <input
-              type="range"
-              min={0}
-              max={1}
-              step={0.01}
-              value={volumen}
-              onChange={(e) => setVolumen(Number(e.target.value))}
-              className="flex-1 accent-primary"
-            />
-          </label>
-          <p className="mt-2 text-center text-xs text-muted-foreground">Llevás {minutos} min de relajación</p>
+          <div className="hidden lg:block">
+            <Recomendaciones recurso="musica" />
+          </div>
         </div>
-      )}
 
-      <Recomendaciones recurso="musica" />
+        <div className="flex flex-col gap-6">
+          {sonando ? (
+            <div className="animate-rise rounded-3xl bg-card-soft p-8 shadow-inner flex flex-col justify-center min-h-[300px]">
+              <div className="flex h-24 items-end justify-center gap-2">
+                {Array.from({ length: 24 }).map((_, i) => (
+                  <span
+                    key={i}
+                    className="w-2 md:w-3 rounded-full bg-dawn"
+                    style={{
+                      height: `${25 + Math.abs(Math.sin(i)) * 60}%`,
+                      animation: "float 2.4s ease-in-out infinite",
+                      animationDelay: `${i * 90}ms`,
+                    }}
+                  />
+                ))}
+              </div>
+              <label className="mt-8 flex items-center gap-4 text-sm font-semibold text-muted-foreground">
+                <span className="text-xl">🔉</span>
+                <input
+                  type="range"
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  value={volumen}
+                  onChange={(e) => setVolumen(Number(e.target.value))}
+                  className="flex-1 accent-primary cursor-pointer"
+                />
+                <span className="text-xl">🔊</span>
+              </label>
+              <p className="mt-6 text-center text-sm font-bold text-deep">Llevás {minutos} min de relajación</p>
+            </div>
+          ) : (
+            <div className="hidden lg:flex flex-1 flex-col items-center justify-center rounded-3xl bg-card-soft p-6 text-center border border-dashed border-border/50 min-h-[300px]">
+              <span className="text-4xl mb-3">🎧</span>
+              <p className="text-sm font-semibold text-deep">Silencio total</p>
+              <p className="text-xs text-muted-foreground mt-1">Seleccioná un ambiente sonoro a tu izquierda para comenzar.</p>
+            </div>
+          )}
+          <div className="block lg:hidden">
+            <Recomendaciones recurso="musica" />
+          </div>
+        </div>
+      </div>
     </Fondo>
   );
 }
