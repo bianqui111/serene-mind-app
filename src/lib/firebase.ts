@@ -12,18 +12,24 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-export const app = initializeApp(firebaseConfig);
+export let app: any = null;
+export let db: any = null;
+export let auth: any = null;
 
-// Habilitar persistencia offline con la API moderna de Firebase
-export const db = initializeFirestore(app, {
-  localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
-});
-
-export const auth = getAuth(app);
+try {
+  app = initializeApp(firebaseConfig);
+  // Habilitar persistencia offline con la API moderna de Firebase
+  db = initializeFirestore(app, {
+    localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+  });
+  auth = getAuth(app);
+} catch (error) {
+  console.error("Error crítico inicializando Firebase (probablemente falten variables de entorno):", error);
+}
 
 export let messaging: any = null;
 try {
-  if (typeof window !== "undefined" && "serviceWorker" in navigator) {
+  if (app && typeof window !== "undefined" && "serviceWorker" in navigator) {
     messaging = getMessaging(app);
   }
 } catch (error) {
