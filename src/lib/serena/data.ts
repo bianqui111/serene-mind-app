@@ -83,6 +83,7 @@ export const PSICOLOGOS = [
     telefono: "+595 992 221911",
     modalidad: "Presencial",
     inicial: "JR",
+    foto: "/img/psicologas/judith.jpg"
   },
   {
     nombre: "Lic. María Lourdes Agüero",
@@ -93,6 +94,7 @@ export const PSICOLOGOS = [
     telefono: "+595 984 160 990",
     modalidad: "Presencial y online",
     inicial: "ML",
+    foto: "/img/psicologas/lourdes.jpg"
   },
   {
     nombre: "Ana Ojeda",
