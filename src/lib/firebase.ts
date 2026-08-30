@@ -20,4 +20,12 @@ export const db = initializeFirestore(app, {
 });
 
 export const auth = getAuth(app);
-export const messaging = typeof window !== "undefined" && "serviceWorker" in navigator ? getMessaging(app) : null;
+
+export let messaging: any = null;
+try {
+  if (typeof window !== "undefined" && "serviceWorker" in navigator) {
+    messaging = getMessaging(app);
+  }
+} catch (error) {
+  console.warn("Firebase Messaging no está soportado en este navegador:", error);
+}
