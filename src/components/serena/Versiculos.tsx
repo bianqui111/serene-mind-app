@@ -3,17 +3,41 @@ import { CabeceraRecurso, Boton, Fondo, Recomendaciones } from "./Ui";
 import { VERSICULOS } from "@/lib/serena/data";
 import { marcarVersiculoNotificado, versiculoDelDia } from "@/lib/serena/store";
 
-export function notificarVersiculo() {
+export async function notificarVersiculo() {
   if (typeof window === "undefined" || !("Notification" in window)) return false;
   if (Notification.permission !== "granted") return false;
   const i = versiculoDelDia(VERSICULOS.length);
   const v = VERSICULOS[i]!;
-  new Notification("Serenamente · Versículo del día", {
-    body: `“${v.texto}” — ${v.cita}`,
-    icon: "/favicon.png",
-  });
-  marcarVersiculoNotificado(i);
-  return true;
+  
+  try {
+    if ("serviceWorker" in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      const registration = registrations[0];
+      if (registration) {
+        await registration.showNotification("Serenamente · Versículo del día", {
+          body: `“${v.texto}” — ${v.cita}`,
+          icon: "/favicon.png",
+        });
+      } else {
+        new Notification("Serenamente · Versículo del día", {
+          body: `“${v.texto}” — ${v.cita}`,
+          icon: "/favicon.png",
+        });
+      }
+    } else {
+      new Notification("Serenamente · Versículo del día", {
+        body: `“${v.texto}” — ${v.cita}`,
+        icon: "/favicon.png",
+      });
+    }
+    marcarVersiculoNotificado(i);
+    return true;
+  } catch (error) {
+    console.error("Error mostrando notificación:", error);
+    // Para evitar un bucle de crash en el siguiente inicio si falla, marcamos como notificado igual.
+    marcarVersiculoNotificado(i);
+    return false;
+  }
 }
 
 export function Versiculos({ onInicio }: { onInicio: () => void }) {

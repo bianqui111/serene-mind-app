@@ -27,7 +27,7 @@ export function Fondo({ children, className = "" }: { children: ReactNode; class
 
 export function PantallaBase({ children }: { children: ReactNode }) {
   return (
-    <div className="relative min-h-screen overflow-hidden bg-background">
+    <div className="relative min-h-screen w-full max-w-[100vw] overflow-x-hidden bg-background">
       <div className="pointer-events-none fixed -left-24 -top-24 h-80 w-80 rounded-full bg-lilac/50 blur-3xl animate-drift" />
       <div className="pointer-events-none fixed -right-20 top-40 h-72 w-72 rounded-full bg-sky-soft/50 blur-3xl animate-drift [animation-delay:-6s]" />
       <div className="pointer-events-none fixed bottom-0 left-1/3 h-80 w-80 rounded-full bg-primary/25 blur-3xl animate-drift [animation-delay:-12s]" />

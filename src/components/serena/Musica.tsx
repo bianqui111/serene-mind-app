@@ -171,11 +171,11 @@ export function Musica({ onInicio }: { onInicio: () => void }) {
         <div className="flex flex-col gap-6">
           {sonando ? (
             <div className="animate-rise rounded-3xl bg-card-soft p-8 shadow-inner flex flex-col justify-center min-h-[300px]">
-              <div className="flex h-24 items-end justify-center gap-2">
+              <div className="flex h-24 items-end justify-center gap-1 md:gap-2">
                 {Array.from({ length: 24 }).map((_, i) => (
                   <span
                     key={i}
-                    className="w-2 md:w-3 rounded-full bg-dawn"
+                    className="w-1.5 md:w-3 rounded-full bg-dawn"
                     style={{
                       height: `${25 + Math.abs(Math.sin(i)) * 60}%`,
                       animation: "float 2.4s ease-in-out infinite",

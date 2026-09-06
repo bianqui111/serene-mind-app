@@ -102,9 +102,10 @@ export const PSICOLOGOS = [
     experiencia: "8 años de experiencia · Atiende de 13 a 30 años",
     descripcion:
       "Especialista en el manejo de la ansiedad, estrés y dificultades emocionales en adolescentes y adultos jóvenes. Ofrece un espacio cálido y seguro donde trabajar las emociones con estrategias adaptadas a cada persona.",
-    telefono: "+595 984 731 829",
+    telefono: "+595 982 303 416",
     modalidad: "Presencial y online",
     inicial: "AO",
+    foto: "/img/psicologas/Ana.jpeg"
   },
 ];
 

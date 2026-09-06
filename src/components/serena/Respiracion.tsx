@@ -81,11 +81,11 @@ export function Respiracion({ onInicio }: { onInicio: () => void }) {
           </div>
         </div>
 
-        <div className="animate-rise mt-4 lg:mt-0 grid place-items-center bg-card-soft/50 p-8 rounded-[3rem] shadow-inner">
-          <div className="relative grid h-72 w-72 md:h-80 md:w-80 place-items-center">
+        <div className="animate-rise mt-4 lg:mt-0 grid place-items-center bg-card-soft/50 p-6 md:p-8 rounded-[3rem] shadow-inner">
+          <div className="relative grid h-64 w-64 md:h-80 md:w-80 place-items-center">
             <div className="absolute inset-0 rounded-full halo animate-glow" />
             <div
-              className="absolute h-52 w-52 md:h-60 md:w-60 rounded-full bg-dawn opacity-90 shadow-lift"
+              className="absolute h-48 w-48 md:h-60 md:w-60 rounded-full bg-dawn opacity-90 shadow-lift"
               style={{ transform: `scale(${activo ? escala : 1})`, transition: `transform ${duracion}s ease-in-out` }}
             />
             <div className="relative text-center text-primary-foreground">
