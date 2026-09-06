@@ -53,7 +53,7 @@ export function Emociones({ onInicio }: { onInicio: () => void }) {
 
       <div className="grid gap-6 lg:grid-cols-2 lg:gap-10">
         {/* Columna Izquierda: Formulario de Registro */}
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6 min-w-0">
           <div className="animate-rise rounded-3xl bg-card-soft p-5 shadow-soft">
             <p className="text-sm font-bold text-deep">¿Qué emoción predomina?</p>
             <div className="mt-3 grid grid-cols-4 md:grid-cols-8 lg:grid-cols-4 gap-2">
@@ -98,7 +98,7 @@ export function Emociones({ onInicio }: { onInicio: () => void }) {
         </div>
 
         {/* Columna Derecha: Estadísticas y Resumen */}
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6 min-w-0">
           <div className="animate-rise grid grid-cols-2 gap-4">
             <div className="rounded-2xl bg-card p-4 text-center shadow-soft flex flex-col justify-center">
               <p className="text-3xl font-bold text-deep">{registros.length}</p>
