@@ -60,7 +60,7 @@ export function Respiracion({ onInicio }: { onInicio: () => void }) {
       <CabeceraRecurso titulo="Ejercicios de respiración" subtitulo="Seguí el círculo con tu respiración" onInicio={onInicio} />
 
       <div className="grid gap-8 lg:grid-cols-2 lg:items-center lg:gap-12">
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6 min-w-0">
           <div className="animate-rise grid gap-3">
             <h2 className="text-base font-bold text-deep mb-1">Elegí una técnica</h2>
             {TECNICAS.map((t) => (
@@ -81,7 +81,7 @@ export function Respiracion({ onInicio }: { onInicio: () => void }) {
           </div>
         </div>
 
-        <div className="animate-rise mt-4 lg:mt-0 grid place-items-center bg-card-soft/50 p-6 md:p-8 rounded-[3rem] shadow-inner">
+        <div className="animate-rise mt-4 lg:mt-0 grid place-items-center bg-card-soft/50 p-6 md:p-8 rounded-[3rem] shadow-inner min-w-0">
           <div className="relative grid h-64 w-64 md:h-80 md:w-80 place-items-center">
             <div className="absolute inset-0 rounded-full halo animate-glow" />
             <div

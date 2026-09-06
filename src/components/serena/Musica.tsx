@@ -139,7 +139,7 @@ export function Musica({ onInicio }: { onInicio: () => void }) {
       <CabeceraRecurso titulo="Música para relajarte" subtitulo="3 ambientes sonoros generados en vivo" onInicio={onInicio} />
 
       <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6 min-w-0">
           <div className="animate-rise grid gap-4">
             <h2 className="text-base font-bold text-deep mb-1">Elegí tu ambiente</h2>
             {PISTAS.map((p) => (
@@ -168,7 +168,7 @@ export function Musica({ onInicio }: { onInicio: () => void }) {
           </div>
         </div>
 
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6 min-w-0">
           {sonando ? (
             <div className="animate-rise rounded-3xl bg-card-soft p-8 shadow-inner flex flex-col justify-center min-h-[300px]">
               <div className="flex h-24 items-end justify-center gap-1 md:gap-2">

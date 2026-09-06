@@ -393,7 +393,7 @@ export function Arte({ onInicio }: { onInicio: () => void }) {
       <CabeceraRecurso titulo="Arte terapia" subtitulo="Dibujá, pintá y soltá lo que sentís" onInicio={onInicio} />
 
       <div className="grid gap-6 lg:grid-cols-[1fr_320px] lg:gap-8">
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 min-w-0">
           <div className="animate-rise flex gap-2 rounded-2xl bg-card p-1.5 shadow-soft">
             {(["pintar", "dibujar", "borrar"] as const).map((m) => (
               <button
