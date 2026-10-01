@@ -135,7 +135,16 @@ function RootComponent() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      registerSW({ immediate: true });
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch((err) => {
+          console.warn("Registro de /sw.js:", err);
+        });
+      }
+      try {
+        registerSW({ immediate: true });
+      } catch (e) {
+        console.warn("registerSW:", e);
+      }
     }
   }, []);
 

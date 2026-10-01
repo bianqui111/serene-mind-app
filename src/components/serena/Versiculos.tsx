@@ -3,72 +3,109 @@ import { CabeceraRecurso, Boton, Fondo, Recomendaciones } from "./Ui";
 import { VERSICULOS } from "@/lib/serena/data";
 import { marcarVersiculoNotificado, versiculoDelDia, versiculoNotificadoHoy } from "@/lib/serena/store";
 
-export async function notificarVersiculo(forzar = false): Promise<boolean> {
-  if (typeof window === "undefined" || !("Notification" in window)) return false;
-  if (Notification.permission !== "granted") return false;
-  if (!forzar && versiculoNotificadoHoy()) return false;
+export async function notificarVersiculo(forzar = false): Promise<{ ok: boolean; detalle?: string }> {
+  if (typeof window === "undefined" || !("Notification" in window)) {
+    return { ok: false, detalle: "Tu navegador no soporta la API de notificaciones." };
+  }
+  if (Notification.permission !== "granted") {
+    return { ok: false, detalle: `Permisos en estado "${Notification.permission}". Tocá "Activar notificaciones" primero.` };
+  }
+  if (!forzar && versiculoNotificadoHoy()) {
+    return { ok: true, detalle: "Ya se notificó el versículo hoy." };
+  }
 
   const i = versiculoDelDia(VERSICULOS.length);
   const v = VERSICULOS[i]!;
+
+  const opciones: any = {
+    body: `“${v.texto}” — ${v.cita}`,
+    icon: "/icon-192.png",
+    badge: "/favicon.png",
+    tag: "versiculo-del-dia",
+    renotify: true,
+    data: { url: "/" },
+    vibrate: [200, 100, 200],
+  };
 
   try {
     let registration: ServiceWorkerRegistration | null = null;
 
     if ("serviceWorker" in navigator) {
       try {
-        // En Android, navigator.serviceWorker.ready garantiza que el SW esté activo
-        registration = await Promise.race([
-          navigator.serviceWorker.ready,
-          new Promise<ServiceWorkerRegistration | null>((resolve) =>
-            setTimeout(() => resolve(null), 3500)
-          ),
-        ]);
-
-        if (!registration) {
-          const regs = await navigator.serviceWorker.getRegistrations();
-          registration = regs[0] || null;
+        const regs = await navigator.serviceWorker.getRegistrations();
+        if (regs && regs.length > 0 && regs[0]) {
+          registration = regs[0];
         }
 
         if (!registration) {
-          registration = await navigator.serviceWorker.register("/sw.js");
+          registration = await navigator.serviceWorker.register("/sw.js", { scope: "/" });
+        }
+
+        // Si está en proceso de instalación/activación, esperar
+        if (registration && (registration.installing || registration.waiting)) {
+          const sw = registration.installing || registration.waiting;
+          if (sw && sw.state !== "activated") {
+            await new Promise<void>((resolve) => {
+              sw.addEventListener("statechange", () => {
+                if (sw.state === "activated") resolve();
+              });
+              setTimeout(resolve, 1500);
+            });
+          }
         }
       } catch (swErr) {
         console.warn("Aviso al obtener Service Worker:", swErr);
       }
     }
 
-    const opciones: any = {
-      body: `“${v.texto}” — ${v.cita}`,
-      icon: "/icon-192.png",
-      badge: "/favicon.png",
-      tag: "versiculo-del-dia",
-      renotify: true,
-      data: { url: "/" },
-      vibrate: [200, 100, 200],
-    };
-
-    // En Android Chrome, new Notification() arroja error ilegal: DEBE usarse showNotification()
+    // 1. En Android Chrome / PWA: DEBE usarse showNotification()
     if (registration && typeof registration.showNotification === "function") {
-      await registration.showNotification("Serenamente · Versículo del día", opciones);
-      marcarVersiculoNotificado(i);
-      return true;
+      try {
+        await registration.showNotification("Serenamente · Versículo del día", opciones);
+        marcarVersiculoNotificado(i);
+        return { ok: true };
+      } catch (showErr: any) {
+        console.warn("Reintentando showNotification sin opciones avanzadas...", showErr);
+        // Algunos dispositivos restringen vibrate o tag
+        try {
+          await registration.showNotification("Serenamente · Versículo del día", {
+            body: `“${v.texto}” — ${v.cita}`,
+            icon: "/icon-192.png",
+          });
+          marcarVersiculoNotificado(i);
+          return { ok: true };
+        } catch (retryErr: any) {
+          return { ok: false, detalle: `Error de Android al emitir: ${retryErr?.message || retryErr}` };
+        }
+      }
     }
 
-    // Fallback únicamente en escritorio si no hay SW activo
+    // 2. Comunicación con el worker activo si existe
+    if (navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage({
+        type: "MOSTRAR_NOTIFICACION",
+        title: "Serenamente · Versículo del día",
+        options: opciones,
+      });
+      marcarVersiculoNotificado(i);
+      return { ok: true };
+    }
+
+    // 3. Fallback en navegador de escritorio
     if (typeof Notification !== "undefined") {
       try {
         new Notification("Serenamente · Versículo del día", opciones);
         marcarVersiculoNotificado(i);
-        return true;
-      } catch (notifErr) {
-        console.warn("new Notification() no soportado en esta plataforma:", notifErr);
+        return { ok: true };
+      } catch (notifErr: any) {
+        return { ok: false, detalle: `No se pudo inicializar la notificación: ${notifErr?.message || notifErr}` };
       }
     }
 
-    return false;
-  } catch (error) {
+    return { ok: false, detalle: "No se encontró el Service Worker activo en este navegador." };
+  } catch (error: any) {
     console.error("Error mostrando notificación:", error);
-    return false;
+    return { ok: false, detalle: error?.message || String(error) };
   }
 }
 
@@ -95,12 +132,11 @@ export function Versiculos({ onInicio }: { onInicio: () => void }) {
       setEstado(permiso);
 
       if (permiso === "granted") {
-        // Enviar inmediatamente una notificación de prueba al teléfono
-        const ok = await notificarVersiculo(true);
-        if (ok) {
-          setMensajeFeedback("¡Notificaciones activadas con éxito! Fijate en la barra superior de tu celular.");
+        const res = await notificarVersiculo(true);
+        if (res.ok) {
+          setMensajeFeedback("¡Notificación enviada! Fijate en la barra superior de tu celular.");
         } else {
-          setMensajeFeedback("Permiso concedido. Se enviará tu versículo automáticamente cada día.");
+          setMensajeFeedback(res.detalle || "Permiso concedido.");
         }
 
         // Registrar token FCM si está disponible
@@ -122,14 +158,14 @@ export function Versiculos({ onInicio }: { onInicio: () => void }) {
             }
           }
         } catch (err) {
-          console.warn("FCM push en segundo plano no configurado aún (las notificaciones locales están activas):", err);
+          console.warn("FCM push en segundo plano no configurado aún:", err);
         }
       } else if (permiso === "denied") {
-        setMensajeFeedback("Las notificaciones están bloqueadas. Habilitalas desde los ajustes del navegador en tu Android.");
+        setMensajeFeedback("Permiso denegado. Tocá el candado o configuración del sitio junto a la URL para permitir notificaciones.");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error al activar notificaciones:", err);
-      setMensajeFeedback("Ocurrió un error al solicitar permisos.");
+      setMensajeFeedback("Error: " + (err?.message || String(err)));
     } finally {
       setProbando(false);
     }
@@ -139,14 +175,14 @@ export function Versiculos({ onInicio }: { onInicio: () => void }) {
     setProbando(true);
     setMensajeFeedback(null);
     try {
-      const ok = await notificarVersiculo(true);
-      if (ok) {
-        setMensajeFeedback("¡Notificación enviada! Deslizá hacia abajo la barra de notificaciones de tu Android.");
+      const res = await notificarVersiculo(true);
+      if (res.ok) {
+        setMensajeFeedback("¡Notificación enviada con éxito! Deslizá hacia abajo la barra de notificaciones de tu Android.");
       } else {
-        setMensajeFeedback("No se pudo enviar. Verificá que las notificaciones no estén bloqueadas en los ajustes de Android.");
+        setMensajeFeedback(res.detalle || "No se pudo emitir la notificación.");
       }
-    } catch {
-      setMensajeFeedback("Error al intentar emitir la notificación.");
+    } catch (e: any) {
+      setMensajeFeedback("Error: " + (e?.message || String(e)));
     } finally {
       setProbando(false);
     }
