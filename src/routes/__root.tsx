@@ -93,7 +93,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content: "Respiración, emociones, versículos, arte terapia y música relajante en una sola app.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:image", content: "/apple-touch-icon.png" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: "/apple-touch-icon.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },

@@ -10,7 +10,7 @@ export function Logo({ size = 64, className = "" }: { size?: number; className?:
       width={size}
       height={size}
       style={{ width: size, height: size }}
-      className={`drop-shadow-[0_10px_24px_rgba(124,120,220,0.45)] ${className}`}
+      className={`object-contain select-none drop-shadow-[0_10px_24px_rgba(124,120,220,0.45)] ${className}`}
     />
   );
 }
