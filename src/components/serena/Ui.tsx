@@ -104,12 +104,14 @@ export function Boton({
   variante = "primario",
   type = "button",
   className = "",
+  disabled = false,
 }: {
   children: ReactNode;
   onClick?: () => void;
   variante?: "primario" | "suave" | "contorno";
   type?: "button" | "submit";
   className?: string;
+  disabled?: boolean;
 }) {
   const estilos = {
     primario: "bg-dawn text-primary-foreground shadow-soft",
@@ -120,7 +122,8 @@ export function Boton({
     <button
       type={type}
       onClick={onClick}
-      className={`press w-full rounded-2xl px-5 py-3.5 text-sm font-bold ${estilos} ${className}`}
+      disabled={disabled}
+      className={`press w-full rounded-2xl px-5 py-3.5 text-sm font-bold ${estilos} ${disabled ? "opacity-50 pointer-events-none" : ""} ${className}`}
     >
       {children}
     </button>

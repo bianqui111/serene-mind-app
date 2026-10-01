@@ -1,41 +1,73 @@
 import { useState } from "react";
 import { CabeceraRecurso, Boton, Fondo, Recomendaciones } from "./Ui";
 import { VERSICULOS } from "@/lib/serena/data";
-import { marcarVersiculoNotificado, versiculoDelDia } from "@/lib/serena/store";
+import { marcarVersiculoNotificado, versiculoDelDia, versiculoNotificadoHoy } from "@/lib/serena/store";
 
-export async function notificarVersiculo() {
+export async function notificarVersiculo(forzar = false): Promise<boolean> {
   if (typeof window === "undefined" || !("Notification" in window)) return false;
   if (Notification.permission !== "granted") return false;
+  if (!forzar && versiculoNotificadoHoy()) return false;
+
   const i = versiculoDelDia(VERSICULOS.length);
   const v = VERSICULOS[i]!;
-  
+
   try {
+    let registration: ServiceWorkerRegistration | null = null;
+
     if ("serviceWorker" in navigator) {
-      const registrations = await navigator.serviceWorker.getRegistrations();
-      const registration = registrations[0];
-      if (registration) {
-        await registration.showNotification("Serenamente · Versículo del día", {
-          body: `“${v.texto}” — ${v.cita}`,
-          icon: "/favicon.png",
-        });
-      } else {
-        new Notification("Serenamente · Versículo del día", {
-          body: `“${v.texto}” — ${v.cita}`,
-          icon: "/favicon.png",
-        });
+      try {
+        // En Android, navigator.serviceWorker.ready garantiza que el SW esté activo
+        registration = await Promise.race([
+          navigator.serviceWorker.ready,
+          new Promise<ServiceWorkerRegistration | null>((resolve) =>
+            setTimeout(() => resolve(null), 3500)
+          ),
+        ]);
+
+        if (!registration) {
+          const regs = await navigator.serviceWorker.getRegistrations();
+          registration = regs[0] || null;
+        }
+
+        if (!registration) {
+          registration = await navigator.serviceWorker.register("/sw.js");
+        }
+      } catch (swErr) {
+        console.warn("Aviso al obtener Service Worker:", swErr);
       }
-    } else {
-      new Notification("Serenamente · Versículo del día", {
-        body: `“${v.texto}” — ${v.cita}`,
-        icon: "/favicon.png",
-      });
     }
-    marcarVersiculoNotificado(i);
-    return true;
+
+    const opciones: any = {
+      body: `“${v.texto}” — ${v.cita}`,
+      icon: "/icon-192.png",
+      badge: "/favicon.png",
+      tag: "versiculo-del-dia",
+      renotify: true,
+      data: { url: "/" },
+      vibrate: [200, 100, 200],
+    };
+
+    // En Android Chrome, new Notification() arroja error ilegal: DEBE usarse showNotification()
+    if (registration && typeof registration.showNotification === "function") {
+      await registration.showNotification("Serenamente · Versículo del día", opciones);
+      marcarVersiculoNotificado(i);
+      return true;
+    }
+
+    // Fallback únicamente en escritorio si no hay SW activo
+    if (typeof Notification !== "undefined") {
+      try {
+        new Notification("Serenamente · Versículo del día", opciones);
+        marcarVersiculoNotificado(i);
+        return true;
+      } catch (notifErr) {
+        console.warn("new Notification() no soportado en esta plataforma:", notifErr);
+      }
+    }
+
+    return false;
   } catch (error) {
     console.error("Error mostrando notificación:", error);
-    // Para evitar un bucle de crash en el siguiente inicio si falla, marcamos como notificado igual.
-    marcarVersiculoNotificado(i);
     return false;
   }
 }
@@ -46,31 +78,77 @@ export function Versiculos({ onInicio }: { onInicio: () => void }) {
   const [estado, setEstado] = useState(
     typeof window !== "undefined" && "Notification" in window ? Notification.permission : "default",
   );
+  const [probando, setProbando] = useState(false);
+  const [mensajeFeedback, setMensajeFeedback] = useState<string | null>(null);
 
   const activar = async () => {
-    if (!("Notification" in window)) {
+    if (typeof window === "undefined" || !("Notification" in window)) {
       setEstado("denied");
+      setMensajeFeedback("Tu navegador no soporta notificaciones push.");
       return;
     }
-    const permiso = await Notification.requestPermission();
-    setEstado(permiso);
-    
-    if (permiso === "granted") {
-      try {
-        const { messaging } = await import("@/lib/firebase");
-        if (messaging) {
-          const { getToken } = await import("firebase/messaging");
-          const token = await getToken(messaging, {
-            vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY
-          });
-          if (token) {
-            const { guardarTokenFCM } = await import("@/lib/serena/store");
-            await guardarTokenFCM(token);
-          }
+
+    try {
+      setProbando(true);
+      setMensajeFeedback(null);
+      const permiso = await Notification.requestPermission();
+      setEstado(permiso);
+
+      if (permiso === "granted") {
+        // Enviar inmediatamente una notificación de prueba al teléfono
+        const ok = await notificarVersiculo(true);
+        if (ok) {
+          setMensajeFeedback("¡Notificaciones activadas con éxito! Fijate en la barra superior de tu celular.");
+        } else {
+          setMensajeFeedback("Permiso concedido. Se enviará tu versículo automáticamente cada día.");
         }
-      } catch (err) {
-        console.error("Error al obtener token FCM:", err);
+
+        // Registrar token FCM si está disponible
+        try {
+          if ("serviceWorker" in navigator) {
+            const reg = await navigator.serviceWorker.ready;
+            const { messaging } = await import("@/lib/firebase");
+            if (messaging) {
+              const { getToken } = await import("firebase/messaging");
+              const vapidKey = import.meta.env.VITE_FIREBASE_VAPID_KEY;
+              const token = await getToken(messaging, {
+                serviceWorkerRegistration: reg,
+                ...(vapidKey ? { vapidKey } : {}),
+              });
+              if (token) {
+                const { guardarTokenFCM } = await import("@/lib/serena/store");
+                await guardarTokenFCM(token);
+              }
+            }
+          }
+        } catch (err) {
+          console.warn("FCM push en segundo plano no configurado aún (las notificaciones locales están activas):", err);
+        }
+      } else if (permiso === "denied") {
+        setMensajeFeedback("Las notificaciones están bloqueadas. Habilitalas desde los ajustes del navegador en tu Android.");
       }
+    } catch (err) {
+      console.error("Error al activar notificaciones:", err);
+      setMensajeFeedback("Ocurrió un error al solicitar permisos.");
+    } finally {
+      setProbando(false);
+    }
+  };
+
+  const probarAhora = async () => {
+    setProbando(true);
+    setMensajeFeedback(null);
+    try {
+      const ok = await notificarVersiculo(true);
+      if (ok) {
+        setMensajeFeedback("¡Notificación enviada! Deslizá hacia abajo la barra de notificaciones de tu Android.");
+      } else {
+        setMensajeFeedback("No se pudo enviar. Verificá que las notificaciones no estén bloqueadas en los ajustes de Android.");
+      }
+    } catch {
+      setMensajeFeedback("Error al intentar emitir la notificación.");
+    } finally {
+      setProbando(false);
     }
   };
 
@@ -86,22 +164,35 @@ export function Versiculos({ onInicio }: { onInicio: () => void }) {
       </article>
 
       <div className="animate-rise mt-4 rounded-3xl bg-card-soft p-5 shadow-soft">
-        <p className="text-sm font-bold text-deep">Notificación diaria</p>
-        <p className="mt-1 text-xs text-muted-foreground">
+        <div className="flex items-center gap-2">
+          <span className="text-xl">🔔</span>
+          <p className="text-sm font-bold text-deep">Notificación diaria en Android</p>
+        </div>
+        <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
           {estado === "granted"
-            ? "Activada: cada día recibirás un versículo nuevo en tu dispositivo."
+            ? "Notificaciones activadas: recibirás tu versículo diario directamente en la pantalla de bloqueo y panel de tu celular."
             : estado === "denied"
-              ? "Bloqueada por el navegador. Habilitá las notificaciones en la configuración del sitio."
-              : "Activá las notificaciones para recibir tu versículo cada mañana."}
+              ? "Bloqueada por el navegador. Tocá el candado en la barra de direcciones o la configuración de Chrome en Android para permitir las notificaciones."
+              : "Activá las notificaciones para recibir un versículo de paz cada mañana en tu dispositivo."}
         </p>
-        
-        {estado !== "granted" && (
-          <div className="mt-3 grid gap-2">
-            <Boton onClick={activar}>
-              Activar notificaciones diarias
-            </Boton>
+
+        {mensajeFeedback && (
+          <div className="mt-3 rounded-2xl bg-primary/10 border border-primary/20 p-3 text-xs font-semibold text-deep animate-fadeIn">
+            {mensajeFeedback}
           </div>
         )}
+
+        <div className="mt-4 flex flex-col sm:flex-row gap-2.5">
+          {estado !== "granted" ? (
+            <Boton onClick={activar} disabled={probando}>
+              {probando ? "Activando..." : "Activar notificaciones en este celular"}
+            </Boton>
+          ) : (
+            <Boton onClick={probarAhora} disabled={probando} variante="suave">
+              {probando ? "Enviando..." : "🔔 Probar notificación ahora en mi celular"}
+            </Boton>
+          )}
+        </div>
       </div>
 
       <section className="animate-rise mt-8">
