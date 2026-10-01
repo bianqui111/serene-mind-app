@@ -152,6 +152,9 @@ export function Versiculos({ onInicio }: { onInicio: () => void }) {
     }
   };
 
+  const esIOS = typeof navigator !== "undefined" && /iPhone|iPad|iPod/.test(navigator.userAgent);
+  const esStandalone = typeof window !== "undefined" && (window.matchMedia("(display-mode: standalone)").matches || (navigator as any).standalone === true);
+
   return (
     <Fondo>
       <CabeceraRecurso titulo="Versículos bíblicos" subtitulo="20 palabras de calma para tu día" onInicio={onInicio} />
@@ -166,15 +169,30 @@ export function Versiculos({ onInicio }: { onInicio: () => void }) {
       <div className="animate-rise mt-4 rounded-3xl bg-card-soft p-5 shadow-soft">
         <div className="flex items-center gap-2">
           <span className="text-xl">🔔</span>
-          <p className="text-sm font-bold text-deep">Notificación diaria en Android</p>
+          <p className="text-sm font-bold text-deep">
+            {esIOS ? "Notificaciones en iPhone / iPad" : "Notificaciones diarias en tu celular"}
+          </p>
         </div>
-        <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-          {estado === "granted"
-            ? "Notificaciones activadas: recibirás tu versículo diario directamente en la pantalla de bloqueo y panel de tu celular."
-            : estado === "denied"
-              ? "Bloqueada por el navegador. Tocá el candado en la barra de direcciones o la configuración de Chrome en Android para permitir las notificaciones."
-              : "Activá las notificaciones para recibir un versículo de paz cada mañana en tu dispositivo."}
-        </p>
+
+        {esIOS && !esStandalone ? (
+          <div className="mt-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 p-3 text-xs leading-relaxed text-amber-900 dark:text-amber-200">
+            <p className="font-bold mb-1">📲 Requisito de Apple para iPhone:</p>
+            Para activar notificaciones en iOS, primero debés agregar la app a tu pantalla de inicio:
+            <ol className="mt-1.5 list-decimal pl-4 space-y-1">
+              <li>Tocá el botón <strong>Compartir</strong> en Safari (el cuadro con flecha arriba <span className="text-sm">⎋</span>).</li>
+              <li>Elegí <strong>"Agregar al inicio"</strong>.</li>
+              <li>Abrí la app desde tu pantalla de inicio y tocá este botón para activarlas.</li>
+            </ol>
+          </div>
+        ) : (
+          <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+            {estado === "granted"
+              ? "Notificaciones activadas: recibirás tu versículo diario directamente en la pantalla de bloqueo y panel de tu celular."
+              : estado === "denied"
+                ? "Bloqueada por el navegador. Tocá el candado o la configuración del navegador para permitir las notificaciones."
+                : "Activá las notificaciones para recibir un versículo de paz cada mañana en tu dispositivo."}
+          </p>
+        )}
 
         {mensajeFeedback && (
           <div className="mt-3 rounded-2xl bg-primary/10 border border-primary/20 p-3 text-xs font-semibold text-deep animate-fadeIn">
