@@ -15,6 +15,7 @@ import {
   orderBy, 
   limit 
 } from "firebase/firestore";
+import { sanitizarTexto } from "./privacy";
 
 export type Usuario = {
   nombre: string;
@@ -95,16 +96,66 @@ export const getEmociones = async (): Promise<RegistroEmocion[]> => {
   }
 };
 
-export const guardarEmocion = async (r: RegistroEmocion) => {
-  const uid = auth.currentUser?.uid;
-  if (!uid) return;
-  await setDoc(doc(db, `usuarios/${uid}/emociones`, r.id), r);
+export const guardarEmocion = async (r: RegistroEmocion): Promise<{ ok: boolean; error?: string }> => {
+  try {
+    const uid = auth.currentUser?.uid;
+    if (!uid) {
+      return { ok: false, error: "Debés tener la sesión iniciada para guardar tus emociones." };
+    }
+    if (!db) {
+      return { ok: false, error: "El servicio de base de datos no está disponible." };
+    }
+    if (!r.emocion || typeof r.nivel !== "number" || r.nivel < 1 || r.nivel > 10) {
+      return { ok: false, error: "Los datos de la emoción no son válidos (intensidad debe estar entre 1 y 10)." };
+    }
+
+    const registroLimpio: RegistroEmocion = {
+      ...r,
+      nota: sanitizarTexto(r.nota || "", 1500),
+      fecha: r.fecha || new Date().toLocaleString("es-PY"),
+    };
+
+    await setDoc(doc(db, `usuarios/${uid}/emociones`, r.id), registroLimpio);
+    return { ok: true };
+  } catch (error: any) {
+    console.error("Error al guardar emoción:", error);
+    let msg = "No se pudo guardar el registro en este momento.";
+    if (error?.code === "permission-denied") {
+      msg = "Permiso denegado por las reglas de seguridad. Verificá tu sesión.";
+    } else if (error?.code === "unavailable" || error?.message?.includes("network")) {
+      msg = "Sin conexión con el servidor. Revisá tu internet e intentá nuevamente.";
+    } else if (error?.message) {
+      msg = `Error: ${error.message}`;
+    }
+    return { ok: false, error: msg };
+  }
 };
 
-export const borrarEmocion = async (id: string) => {
-  const uid = auth.currentUser?.uid;
-  if (!uid) return;
-  await deleteDoc(doc(db, `usuarios/${uid}/emociones`, id));
+export const borrarEmocion = async (id: string): Promise<{ ok: boolean; error?: string }> => {
+  try {
+    const uid = auth.currentUser?.uid;
+    if (!uid) return { ok: false, error: "No hay sesión activa." };
+    await deleteDoc(doc(db, `usuarios/${uid}/emociones`, id));
+    return { ok: true };
+  } catch (error: any) {
+    console.error("Error al borrar emoción:", error);
+    return { ok: false, error: "No se pudo eliminar el registro." };
+  }
+};
+
+export const borrarTodasLasEmociones = async (): Promise<{ ok: boolean; count: number; error?: string }> => {
+  try {
+    const uid = auth.currentUser?.uid;
+    if (!uid) return { ok: false, count: 0, error: "No hay sesión activa." };
+    const q = query(collection(db, `usuarios/${uid}/emociones`));
+    const snapshot = await getDocs(q);
+    const deletePromises = snapshot.docs.map((d) => deleteDoc(d.ref));
+    await Promise.all(deletePromises);
+    return { ok: true, count: snapshot.docs.length };
+  } catch (error: any) {
+    console.error("Error al borrar todas las emociones:", error);
+    return { ok: false, count: 0, error: "No se pudieron eliminar todos los registros." };
+  }
 };
 
 // ======================= ARTE =======================

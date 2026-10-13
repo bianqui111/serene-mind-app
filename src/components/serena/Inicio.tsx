@@ -83,14 +83,22 @@ export function Inicio({
       <div className="mt-6 grid grid-cols-2 gap-3">
         <button
           onClick={() => onAbrir("ajustes" as Recurso)}
-          className="press rounded-2xl border border-border bg-card py-3 text-xs font-bold text-primary"
+          className="press flex items-center justify-center gap-1.5 rounded-2xl border border-border bg-card py-3 text-xs font-bold text-primary hover:bg-card-soft transition-colors"
         >
-          ⚙️ Ajustes
+          ⚙️ Ajustes y Privacidad
         </button>
-        <button onClick={onSalir} className="press rounded-2xl border border-border bg-card py-3 text-xs font-bold text-primary">
+        <button
+          onClick={onSalir}
+          className="press rounded-2xl border border-border bg-card py-3 text-xs font-bold text-primary hover:bg-card-soft transition-colors"
+        >
           Cerrar sesión
         </button>
       </div>
+
+      <p className="mt-4 text-center text-[11px] text-muted-foreground flex items-center justify-center gap-1">
+        <span>🔒</span>
+        <span>Tus datos son 100% privados y están protegidos de extremo a extremo.</span>
+      </p>
     </Fondo>
   );
 }

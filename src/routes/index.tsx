@@ -9,8 +9,10 @@ import { Arte } from "@/components/serena/Arte";
 import { Musica } from "@/components/serena/Musica";
 import { Psicologos } from "@/components/serena/Psicologos";
 import { Ajustes } from "@/components/serena/Ajustes";
+import { BloqueoPin } from "@/components/serena/BloqueoPin";
 import type { Recurso } from "@/lib/serena/data";
 import { cerrarSesion, versiculoNotificadoHoy, type Usuario } from "@/lib/serena/store";
+import { isAppBloqueada, isPinLockActive } from "@/lib/serena/privacy";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 
@@ -44,6 +46,7 @@ function App() {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [cargando, setCargando] = useState(true);
   const [vista, setVista] = useState<Recurso | null>(null);
+  const [bloqueada, setBloqueada] = useState(false);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (user) => {
@@ -58,8 +61,12 @@ function App() {
         }
 
         setUsuario({ nombre: nombreFinal, email: user.email || "" });
+        if (isPinLockActive()) {
+          setBloqueada(isAppBloqueada());
+        }
       } else {
         setUsuario(null);
+        setBloqueada(false);
       }
       setCargando(false);
     });
@@ -74,6 +81,21 @@ function App() {
   if (cargando) return <div className="min-h-screen flex items-center justify-center bg-[#F9FAFB]"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#1E3A8A]"></div></div>;
 
   if (!usuario) return <Auth onEntrar={setUsuario} />;
+
+  if (bloqueada && isPinLockActive()) {
+    return (
+      <PantallaBase>
+        <BloqueoPin
+          onDesbloquear={() => setBloqueada(false)}
+          onCerrarSesion={() => {
+            cerrarSesion();
+            setUsuario(null);
+            setBloqueada(false);
+          }}
+        />
+      </PantallaBase>
+    );
+  }
 
   const alInicio = () => setVista(null);
 

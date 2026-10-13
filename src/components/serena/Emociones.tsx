@@ -2,31 +2,81 @@ import { useEffect, useState } from "react";
 import { CabeceraRecurso, Boton, Fondo, Recomendaciones } from "./Ui";
 import { EMOCIONES } from "@/lib/serena/data";
 import { borrarEmocion, getEmociones, guardarEmocion, type RegistroEmocion } from "@/lib/serena/store";
+import { toast } from "sonner";
+import { CheckCircle2, AlertCircle, ShieldCheck, Trash2 } from "lucide-react";
+
+type FeedbackEstado = {
+  tipo: "exito" | "error";
+  titulo: string;
+  mensaje: string;
+} | null;
 
 export function Emociones({ onInicio }: { onInicio: () => void }) {
   const [registros, setRegistros] = useState<RegistroEmocion[]>([]);
   const [emocion, setEmocion] = useState(EMOCIONES[0]!);
   const [nivel, setNivel] = useState(5);
   const [nota, setNota] = useState("");
-  const [aviso, setAviso] = useState("");
+  const [guardando, setGuardando] = useState(false);
+  const [feedback, setFeedback] = useState<FeedbackEstado>(null);
 
   useEffect(() => {
     getEmociones().then(setRegistros);
   }, []);
 
   const guardar = async () => {
-    await guardarEmocion({
+    if (guardando) return;
+    setGuardando(true);
+    setFeedback(null);
+
+    const nuevoRegistro: RegistroEmocion = {
       id: crypto.randomUUID(),
       fecha: new Date().toLocaleString("es-PY"),
       emocion: emocion.label,
       emoji: emocion.emoji,
       nivel,
       nota: nota.trim(),
-    });
-    setRegistros(await getEmociones());
-    setNota("");
-    setAviso("Registro guardado 💙");
-    setTimeout(() => setAviso(""), 2200);
+    };
+
+    const resultado = await guardarEmocion(nuevoRegistro);
+
+    setGuardando(false);
+
+    if (resultado.ok) {
+      setFeedback({
+        tipo: "exito",
+        titulo: "¡Registro guardado correctamente! 💙",
+        mensaje: "Tu emoción se guardó de forma exitosa y privada en tu cuenta.",
+      });
+      toast.success("¡Registro emocional guardado correctamente! 💙");
+      setNota("");
+      const actualizados = await getEmociones();
+      setRegistros(actualizados);
+
+      // Desvanecer el mensaje después de 4 segundos
+      setTimeout(() => {
+        setFeedback((prev) => (prev?.tipo === "exito" ? null : prev));
+      }, 4000);
+    } else {
+      const errorMsg = resultado.error || "Ocurrió un error inesperado al intentar guardar.";
+      setFeedback({
+        tipo: "error",
+        titulo: "No se pudo guardar el registro",
+        mensaje: errorMsg,
+      });
+      toast.error(`No se pudo guardar: ${errorMsg}`);
+    }
+  };
+
+  const confirmarBorrado = async (id: string) => {
+    if (window.confirm("¿Estás seguro/a de que querés borrar este registro emocional? Esta acción no se puede deshacer.")) {
+      const res = await borrarEmocion(id);
+      if (res.ok) {
+        toast.success("Registro eliminado correctamente.");
+        setRegistros(await getEmociones());
+      } else {
+        toast.error("No se pudo eliminar el registro: " + (res.error || "Error desconocido"));
+      }
+    }
   };
 
   const promedio = registros.length
@@ -88,10 +138,39 @@ export function Emociones({ onInicio }: { onInicio: () => void }) {
               rows={3}
               className="mt-4 w-full resize-none rounded-2xl border border-border bg-card px-4 py-3 text-sm outline-none transition-colors focus:border-primary focus:ring-4 focus:ring-ring/25"
             />
-            <div className="mt-3">
-              <Boton onClick={guardar}>Guardar registro</Boton>
+            <div className="mt-4">
+              <Boton onClick={guardar} disabled={guardando}>
+                {guardando ? "Guardando registro..." : "Guardar registro"}
+              </Boton>
             </div>
-            {aviso && <p className="mt-2 text-center text-xs font-semibold text-primary">{aviso}</p>}
+
+            {/* Mensaje de estado: guardado correctamente o error */}
+            {feedback && (
+              <div
+                className={`mt-4 flex items-start gap-3 rounded-2xl p-4 text-xs transition-all animate-rise ${
+                  feedback.tipo === "exito"
+                    ? "bg-emerald-500/10 border border-emerald-500/30 text-emerald-900 dark:text-emerald-100"
+                    : "bg-rose-500/10 border border-rose-500/30 text-rose-900 dark:text-rose-100"
+                }`}
+                role="alert"
+              >
+                {feedback.tipo === "exito" ? (
+                  <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400 mt-0.5" />
+                ) : (
+                  <AlertCircle className="h-5 w-5 shrink-0 text-rose-600 dark:text-rose-400 mt-0.5" />
+                )}
+                <div className="flex-1">
+                  <p className="font-bold text-sm leading-tight">{feedback.titulo}</p>
+                  <p className="mt-1 leading-relaxed opacity-90">{feedback.mensaje}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Sello de seguridad y privacidad */}
+            <div className="mt-4 flex items-center justify-center gap-1.5 rounded-xl bg-card px-3 py-2 text-[11px] text-muted-foreground border border-border/40">
+              <ShieldCheck className="h-3.5 w-3.5 text-primary shrink-0" />
+              <span>Tus registros son confidenciales y están 100% protegidos.</span>
+            </div>
           </div>
 
           <Recomendaciones recurso="emociones" />
@@ -162,10 +241,12 @@ export function Emociones({ onInicio }: { onInicio: () => void }) {
                         <p className="text-[11px] text-muted-foreground">{r.fecha}</p>
                       </div>
                       <button
-                        onClick={async () => { await borrarEmocion(r.id); setRegistros(await getEmociones()); }}
-                        className="text-xs font-bold text-destructive hover:underline p-1"
+                        onClick={() => confirmarBorrado(r.id)}
+                        className="press flex items-center gap-1 rounded-xl p-1.5 text-xs font-bold text-destructive hover:bg-destructive/10 transition-colors"
+                        title="Borrar registro permanentemente"
                       >
-                        Borrar
+                        <Trash2 className="h-3.5 w-3.5" />
+                        <span>Borrar</span>
                       </button>
                     </div>
                     {r.nota && <p className="mt-2 text-xs leading-relaxed text-secondary-foreground">{r.nota}</p>}
