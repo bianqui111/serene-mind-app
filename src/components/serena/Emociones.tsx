@@ -44,10 +44,10 @@ export function Emociones({ onInicio }: { onInicio: () => void }) {
     if (resultado.ok) {
       setFeedback({
         tipo: "exito",
-        titulo: "¡Registro guardado correctamente! 💙",
-        mensaje: "Tu emoción se guardó de forma exitosa y privada en tu cuenta.",
+        titulo: "¡Registro guardado con éxito! 💙",
+        mensaje: "Tu emoción se guardó con éxito y de forma privada en tu cuenta.",
       });
-      toast.success("¡Registro emocional guardado correctamente! 💙");
+      toast.success("¡Registro emocional guardado con éxito! 💙");
       setNota("");
       const actualizados = await getEmociones();
       setRegistros(actualizados);
@@ -71,7 +71,7 @@ export function Emociones({ onInicio }: { onInicio: () => void }) {
     if (window.confirm("¿Estás seguro/a de que querés borrar este registro emocional? Esta acción no se puede deshacer.")) {
       const res = await borrarEmocion(id);
       if (res.ok) {
-        toast.success("Registro eliminado correctamente.");
+        toast.success("¡Registro eliminado con éxito! 💙");
         setRegistros(await getEmociones());
       } else {
         toast.error("No se pudo eliminar el registro: " + (res.error || "Error desconocido"));

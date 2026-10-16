@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { CabeceraRecurso, Boton, Fondo, Recomendaciones } from "./Ui";
 import { PALETA_20 } from "@/lib/serena/data";
 import { borrarDibujo, getDibujos, guardarDibujo, type Dibujo } from "@/lib/serena/store";
+import { toast } from "sonner";
 
 const W = 640;
 const H = 640;
@@ -233,7 +234,11 @@ export const PLANTILLAS: Plantilla[] = [
           const rad = k % 2 === 0 ? r : r * 0.45;
           const px = x + Math.cos(a) * rad;
           const py = y + Math.sin(a) * rad;
-          k === 0 ? c.moveTo(px, py) : c.lineTo(px, py);
+          if (k === 0) {
+            c.moveTo(px, py);
+          } else {
+            c.lineTo(px, py);
+          }
         }
         c.closePath();
         c.stroke();
@@ -384,8 +389,15 @@ export function Arte({ onInicio }: { onInicio: () => void }) {
     const d: Dibujo = { id: crypto.randomUUID(), fecha: new Date().toLocaleString("es-PY"), data };
     await guardarDibujo(d);
     setGaleria(await getDibujos());
-    setAviso("Dibujo guardado en tu galería 💜");
-    setTimeout(() => setAviso(""), 2500);
+    setAviso("¡Dibujo guardado con éxito en tu galería! 🎨");
+    toast.success("¡Dibujo guardado con éxito! 🎨");
+    setTimeout(() => setAviso(""), 3000);
+  };
+
+  const borrar = async (id: string) => {
+    await borrarDibujo(id);
+    setGaleria(await getDibujos());
+    toast.success("¡Dibujo eliminado correctamente! 🗑️");
   };
 
   return (
@@ -480,7 +492,7 @@ export function Arte({ onInicio }: { onInicio: () => void }) {
                     <figcaption className="mt-2 flex items-center justify-between px-1 text-[10px] text-muted-foreground">
                       <span>{d.fecha.split(',')[0]}</span>
                       <button
-                        onClick={async () => { await borrarDibujo(d.id); setGaleria(await getDibujos()); }}
+                        onClick={() => borrar(d.id)}
                         className="font-bold text-destructive hover:underline"
                       >
                         Borrar
