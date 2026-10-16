@@ -3,6 +3,10 @@ import { CabeceraRecurso, Boton, Fondo, Recomendaciones } from "./Ui";
 import { VERSICULOS } from "@/lib/serena/data";
 import { marcarVersiculoNotificado, versiculoDelDia, versiculoNotificadoHoy } from "@/lib/serena/store";
 
+function mensajeDeError(e: unknown): string {
+  return e instanceof Error ? e.message : String(e);
+}
+
 export async function notificarVersiculo(forzar = false): Promise<{ ok: boolean; detalle?: string }> {
   if (typeof window === "undefined" || !("Notification" in window)) {
     return { ok: false, detalle: "Tu navegador no soporta la API de notificaciones." };
@@ -17,7 +21,7 @@ export async function notificarVersiculo(forzar = false): Promise<{ ok: boolean;
   const i = versiculoDelDia(VERSICULOS.length);
   const v = VERSICULOS[i]!;
 
-  const opciones: any = {
+  const opciones: NotificationOptions = {
     body: `“${v.texto}” — ${v.cita}`,
     icon: "/icon-192.png",
     badge: "/favicon.png",
@@ -64,7 +68,7 @@ export async function notificarVersiculo(forzar = false): Promise<{ ok: boolean;
         await registration.showNotification("Serenamente · Versículo del día", opciones);
         marcarVersiculoNotificado(i);
         return { ok: true };
-      } catch (showErr: any) {
+      } catch (showErr: unknown) {
         console.warn("Reintentando showNotification sin opciones avanzadas...", showErr);
         // Algunos dispositivos restringen vibrate o tag
         try {
@@ -74,8 +78,8 @@ export async function notificarVersiculo(forzar = false): Promise<{ ok: boolean;
           });
           marcarVersiculoNotificado(i);
           return { ok: true };
-        } catch (retryErr: any) {
-          return { ok: false, detalle: `Error de Android al emitir: ${retryErr?.message || retryErr}` };
+        } catch (retryErr: unknown) {
+          return { ok: false, detalle: `Error de Android al emitir: ${mensajeDeError(retryErr)}` };
         }
       }
     }
@@ -97,15 +101,15 @@ export async function notificarVersiculo(forzar = false): Promise<{ ok: boolean;
         new Notification("Serenamente · Versículo del día", opciones);
         marcarVersiculoNotificado(i);
         return { ok: true };
-      } catch (notifErr: any) {
-        return { ok: false, detalle: `No se pudo inicializar la notificación: ${notifErr?.message || notifErr}` };
+      } catch (notifErr: unknown) {
+        return { ok: false, detalle: `No se pudo inicializar la notificación: ${mensajeDeError(notifErr)}` };
       }
     }
 
     return { ok: false, detalle: "No se encontró el Service Worker activo en este navegador." };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error mostrando notificación:", error);
-    return { ok: false, detalle: error?.message || String(error) };
+    return { ok: false, detalle: mensajeDeError(error) };
   }
 }
 
@@ -163,9 +167,9 @@ export function Versiculos({ onInicio }: { onInicio: () => void }) {
       } else if (permiso === "denied") {
         setMensajeFeedback("Permiso denegado. Tocá el candado o configuración del sitio junto a la URL para permitir notificaciones.");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error al activar notificaciones:", err);
-      setMensajeFeedback("Error: " + (err?.message || String(err)));
+      setMensajeFeedback("Error: " + mensajeDeError(err));
     } finally {
       setProbando(false);
     }
@@ -181,15 +185,15 @@ export function Versiculos({ onInicio }: { onInicio: () => void }) {
       } else {
         setMensajeFeedback(res.detalle || "No se pudo emitir la notificación.");
       }
-    } catch (e: any) {
-      setMensajeFeedback("Error: " + (e?.message || String(e)));
+    } catch (e: unknown) {
+      setMensajeFeedback("Error: " + mensajeDeError(e));
     } finally {
       setProbando(false);
     }
   };
 
   const esIOS = typeof navigator !== "undefined" && /iPhone|iPad|iPod/.test(navigator.userAgent);
-  const esStandalone = typeof window !== "undefined" && (window.matchMedia("(display-mode: standalone)").matches || (navigator as any).standalone === true);
+  const esStandalone = typeof window !== "undefined" && (window.matchMedia("(display-mode: standalone)").matches || (navigator as Navigator & { standalone?: boolean }).standalone === true);
 
   return (
     <Fondo>

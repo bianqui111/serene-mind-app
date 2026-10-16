@@ -58,7 +58,7 @@ export function Ajustes({ onInicio }: { onInicio: () => void }) {
       await sendPasswordResetEmail(auth, email);
       setEnviado(true);
       toast.success("Correo de recuperación enviado con éxito.");
-    } catch (e: any) {
+    } catch {
       setErrorRecuperacion("Ocurrió un error al enviar el correo. Intentá de nuevo.");
       toast.error("Error al enviar correo de recuperación.");
     } finally {

@@ -5,6 +5,13 @@ import { getMessaging, onBackgroundMessage } from "firebase/messaging/sw";
 
 declare let self: ServiceWorkerGlobalScope;
 
+type PushPayload = {
+  notification?: { title?: string; body?: string; click_action?: string };
+  data?: Record<string, string>;
+  title?: string;
+  body?: string;
+};
+
 // Activar inmediatamente el nuevo Service Worker sin esperar a cerrar pestañas
 self.addEventListener("install", () => {
   self.skipWaiting();
@@ -35,7 +42,7 @@ try {
     onBackgroundMessage(messaging, (payload) => {
       const data = payload.data as Record<string, string> | undefined;
       const notificationTitle = payload.notification?.title || data?.["title"] || "Serenamente · Versículo del día";
-      const notificationOptions: any = {
+      const notificationOptions: NotificationOptions = {
         body: payload.notification?.body || data?.["body"] || "",
         icon: "/icon-192.png",
         badge: "/favicon.png",
@@ -56,12 +63,12 @@ try {
 self.addEventListener("push", (event) => {
   if (!event.data) return;
   try {
-    const payload = event.data.json() as any;
+    const payload = event.data.json() as PushPayload;
     const title = payload.notification?.title || payload.data?.title || payload.title || "Serenamente · Versículo del día";
     const body = payload.notification?.body || payload.data?.body || payload.body || "";
     const url = payload.data?.url || payload.notification?.click_action || "/";
 
-    const opts: any = {
+    const opts: NotificationOptions = {
       body,
       icon: "/icon-192.png",
       badge: "/favicon.png",
@@ -74,7 +81,7 @@ self.addEventListener("push", (event) => {
     event.waitUntil(self.registration.showNotification(title, opts));
   } catch {
     const text = event.data.text();
-    const opts: any = {
+    const opts: NotificationOptions = {
       body: text,
       icon: "/icon-192.png",
       badge: "/favicon.png",

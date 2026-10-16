@@ -1,7 +1,11 @@
 import { initializeApp } from "firebase/app";
+import type { FirebaseApp } from "firebase/app";
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from "firebase/firestore";
+import type { Firestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
+import type { Auth } from "firebase/auth";
 import { getMessaging } from "firebase/messaging";
+import type { Messaging } from "firebase/messaging";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -12,9 +16,11 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-export let app: any = null;
-export let db: any = null;
-export let auth: any = null;
+// Se asignan durante la inicialización de abajo. Solo quedarían nulos si Firebase
+// no puede inicializarse (configuración faltante), caso tratado en el try/catch.
+export let app = null as unknown as FirebaseApp;
+export let db = null as unknown as Firestore;
+export let auth = null as unknown as Auth;
 
 try {
   app = initializeApp(firebaseConfig);
@@ -27,7 +33,7 @@ try {
   console.error("Error crítico inicializando Firebase (probablemente falten variables de entorno):", error);
 }
 
-export let messaging: any = null;
+export let messaging = null as unknown as Messaging;
 try {
   if (app && typeof window !== "undefined" && "serviceWorker" in navigator) {
     messaging = getMessaging(app);

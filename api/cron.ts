@@ -15,7 +15,12 @@ if (!admin.apps.length) {
 const db = admin.firestore();
 const messaging = admin.messaging();
 
-export default async function handler(req: any, res: any) {
+type CronRequest = { headers: Record<string, string | undefined> };
+type CronResponse = {
+  status: (code: number) => { json: (body: unknown) => unknown };
+};
+
+export default async function handler(req: CronRequest, res: CronResponse) {
   try {
     // 1. Verificar autorización si se llama por HTTP (opcional pero recomendado)
     if (
@@ -40,11 +45,11 @@ export default async function handler(req: any, res: any) {
     const hoy = new Date();
     const dias = Math.floor(hoy.getTime() / 86400000);
     // Usamos el módulo para elegir uno diario (de una muestra de 6)
-    const v = VERSICULOS[dias % VERSICULOS.length]; 
+    const v = VERSICULOS[dias % VERSICULOS.length];
 
     // 2. Buscar todos los tokens de todos los usuarios
     const usuariosSnapshot = await db.collection("usuarios").get();
-    let tokens: string[] = [];
+    const tokens: string[] = [];
 
     for (const doc of usuariosSnapshot.docs) {
       const pushTokensSnapshot = await db.collection(`usuarios/${doc.id}/push_tokens`).get();
@@ -67,7 +72,7 @@ export default async function handler(req: any, res: any) {
     };
 
     const response = await messaging.sendEachForMulticast(payload);
-    
+
     // Limpieza de tokens inválidos (opcional)
     if (response.failureCount > 0) {
       console.log(`Fallaron ${response.failureCount} notificaciones.`);
@@ -78,8 +83,9 @@ export default async function handler(req: any, res: any) {
       message: `Notificaciones enviadas con éxito. Éxitos: ${response.successCount}, Fallos: ${response.failureCount}`,
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error al enviar notificaciones:", error);
-    return res.status(500).json({ error: error.message });
+    const mensaje = error instanceof Error ? error.message : String(error);
+    return res.status(500).json({ error: mensaje });
   }
 }

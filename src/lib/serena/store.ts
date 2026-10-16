@@ -17,6 +17,14 @@ import {
 } from "firebase/firestore";
 import { sanitizarTexto } from "./privacy";
 
+function infoDeError(e: unknown): { message: string; code: string } {
+  const err = e as { message?: unknown; code?: unknown } | null | undefined;
+  return {
+    message: typeof err?.message === "string" ? err.message : "",
+    code: typeof err?.code === "string" ? err.code : "",
+  };
+}
+
 export type Usuario = {
   nombre: string;
   email: string;
@@ -51,13 +59,14 @@ export const registrarUsuario = async (u: Usuario): Promise<{ ok: boolean; error
       await updateProfile(auth.currentUser, { displayName: u.nombre });
     }
     return { ok: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Firebase Auth Error:", error);
-    let msg = "Error al registrar: " + (error.message || error.code || "");
-    if (error.code === "auth/email-already-in-use") msg = "Ya existe una cuenta con ese correo.";
-    if (error.code === "auth/weak-password") msg = "La contraseña es muy débil (min. 6 caracteres).";
-    if (error.code === "auth/invalid-email") msg = "El correo es inválido.";
-    if (error.code === "auth/operation-not-allowed") msg = "Debes habilitar 'Correo/Contraseña' en Firebase Console > Authentication.";
+    const { message, code } = infoDeError(error);
+    let msg = "Error al registrar: " + (message || code || "");
+    if (code === "auth/email-already-in-use") msg = "Ya existe una cuenta con ese correo.";
+    if (code === "auth/weak-password") msg = "La contraseña es muy débil (min. 6 caracteres).";
+    if (code === "auth/invalid-email") msg = "El correo es inválido.";
+    if (code === "auth/operation-not-allowed") msg = "Debes habilitar 'Correo/Contraseña' en Firebase Console > Authentication.";
     return { ok: false, error: msg };
   }
 };
@@ -72,7 +81,7 @@ export const iniciarSesion = async (email: string, password: string): Promise<{ 
         email: cred.user.email || email 
       } 
     };
-  } catch (error: any) {
+  } catch {
     return { ok: false, error: "Correo o contraseña incorrectos." };
   }
 };
@@ -117,15 +126,16 @@ export const guardarEmocion = async (r: RegistroEmocion): Promise<{ ok: boolean;
 
     await setDoc(doc(db, `usuarios/${uid}/emociones`, r.id), registroLimpio);
     return { ok: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error al guardar emoción:", error);
+    const { message, code } = infoDeError(error);
     let msg = "No se pudo guardar el registro en este momento.";
-    if (error?.code === "permission-denied") {
+    if (code === "permission-denied") {
       msg = "Permiso denegado por las reglas de seguridad. Verificá tu sesión.";
-    } else if (error?.code === "unavailable" || error?.message?.includes("network")) {
+    } else if (code === "unavailable" || message.includes("network")) {
       msg = "Sin conexión con el servidor. Revisá tu internet e intentá nuevamente.";
-    } else if (error?.message) {
-      msg = `Error: ${error.message}`;
+    } else if (message) {
+      msg = `Error: ${message}`;
     }
     return { ok: false, error: msg };
   }
@@ -137,7 +147,7 @@ export const borrarEmocion = async (id: string): Promise<{ ok: boolean; error?: 
     if (!uid) return { ok: false, error: "No hay sesión activa." };
     await deleteDoc(doc(db, `usuarios/${uid}/emociones`, id));
     return { ok: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error al borrar emoción:", error);
     return { ok: false, error: "No se pudo eliminar el registro." };
   }
@@ -152,7 +162,7 @@ export const borrarTodasLasEmociones = async (): Promise<{ ok: boolean; count: n
     const deletePromises = snapshot.docs.map((d) => deleteDoc(d.ref));
     await Promise.all(deletePromises);
     return { ok: true, count: snapshot.docs.length };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error al borrar todas las emociones:", error);
     return { ok: false, count: 0, error: "No se pudieron eliminar todos los registros." };
   }
